@@ -1,6 +1,6 @@
 /**The MIT License (MIT)
  
- Copyright (c) 2018 by ThingPulse Ltd., https://thingpulse.com
+ Copyright (c) 2025 by idezentas
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
