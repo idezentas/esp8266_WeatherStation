@@ -34,6 +34,13 @@
         "name": "Euro",
         "symbol": "€"
     },
+    "usd": {
+        "code": "USD",
+        "alphaCode": "USD",
+        "numericCode": "840",
+        "name": "U.S. Dollar",
+        "symbol": "$"
+    },
     "gbp": {
         "code": "GBP",
         "alphaCode": "GBP",

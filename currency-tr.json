@@ -34,6 +34,13 @@
         "name": "Avro",
         "symbol": "€"
     },
+    "usd": {
+        "code": "USD",
+        "alphaCode": "USD",
+        "numericCode": "840",
+        "name": "ABD Doları",
+        "symbol": "$"
+    },    
     "gbp": {
         "code": "GBP",
         "alphaCode": "GBP",
