@@ -110,7 +110,7 @@ Döviz Kuru Ayarları
 | SCL          | D1 (GPIO5)            |
 | SDA          | D2 (GPIO4)            |
 
-![Bağlantı Şeması](https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/05/ESP8266_oled_display_wiring.png?quality=100&strip=all&ssl=1)
+<img src="https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/05/ESP8266_oled_display_wiring.png?quality=100&strip=all&ssl=1" alt="Bağlantı Şeması" width="300"/>
 Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutorials.com/esp8266-0-96-inch-oled-display-with-arduino-ide/)
 
 ## Teşekkürler
