@@ -1,6 +1,6 @@
 /**The MIT License (MIT)
  
- Copyright (c) 2025 by idezentas
+ Copyright (c) 2018 by ThingPulse Ltd., https://thingpulse.com
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -31,14 +31,12 @@ typedef struct FloatRatesData {
   // "date": "Fri, 1 Aug 2025 23:59:00 GMT",
   String date;
   String targetName;
-  // Ex: "inverseRate": 0.87314002180623
-  float inverseRate;
 } FloatRatesData;
 
 class FloatRates: public JsonListener {
   private:
-    const char* host = "www.floatrates.com";
-    const int port = 80;
+    const String host = "www.floatrates.com";
+    const uint8_t port = 80;
     String currentKey;
     String currentParent;
     FloatRatesData *data;

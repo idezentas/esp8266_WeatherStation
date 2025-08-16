@@ -1,28 +1,35 @@
 #include <Arduino.h>
-#pragma once
 
 String OPEN_WEATHER_MAP_LANGUAGE = "en";
 
-String WDAY_NAMES[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
+const char* DIFF_TEXT = "DIFF";
 
-String MONTH_NAMES[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
+const char* HOUR_TEXT = "HR";
 
-String SUN_MOON_TEXT[] = {"SUN", "MOON", "RISE", "SET"};
+const char* WDAY_NAMES[] = {"SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"};
 
-String MOON_PHASES[] = {"NEW MOON", "WAXING CRESCENT", "FIRST QUARTER", "WAXING GIBBOUS", "FULL MOON", "WANING GIBBOUS", "THIRD QUARTER", "WANING CRESCENT"};
+const char* MONTH_NAMES[] = {"JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC"};
 
-String WIND_DIRECTION[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
+const char* SUN_MOON_TEXT[] = {"SUN", "MOON", "RISE", "SET"};
 
-String WIND_DIRECTION_LONG[] = {"NORTH", "NORTHEAST", "EAST", "SOUTHEAST", "SOUTH", "SOUTHWEST", "WEST", "NORTHWEST"};
+const char* MOON_PHASES[] = {"NEW MOON", "WAXING CRESCENT", "FIRST QUARTER", "WAXING GIBBOUS", "FULL MOON", "WANING GIBBOUS", "THIRD QUARTER", "WANING CRESCENT"};
 
-String AIR_QUALITY_TEXT[] = {"GOOD", "MODERATE", "FAIR", "POOR", "VERY POOR"};
+const char* WIND_DIRECTION[] = {"N", "NE", "E", "SE", "S", "SW", "W", "NW"};
 
-String UV_INDEX_TEXT[] = {"GOOD", "MODERATE", "HIGH", "VERY HIGH", "EXTREME"};
+const char* WIND_DIRECTION_LONG[] = {"NORTH", "NORTHEAST", "EAST", "SOUTHEAST", "SOUTH", "SOUTHWEST", "WEST", "NORTHWEST"};
 
-String PROGRESS_TEXT[] = {"Updating time...", "Updating weather...", "Updating forecasts...", "Updating air quality...", "Updating astronomy...", "Done...", "Updating UV index...", "Updating currencies..."};
+const char* AIR_QUALITY_TEXT[] = {"GOOD", "MODERATE", "FAIR", "POOR", "VERY POOR"};
 
-String HTML_TEXT[] = {"ESP8266 Weather Station", "Device Settings", "WiFi Settings", "Security Settings", "OpenWeatherMap API Key", "Enter your API key", "Show", "OpenCage API Key", "District Name", "Example: Sarıyer", "City Name", "Example: Istanbul", "Country Code", "Example: TR", "Find Location/Time from City", "Latitude", "Example: 41.1719525", "Longitude", "Example: 28.859487", "Time Zone (GMT)", "Example: 3", "Use Daylight Saving Time", "Time Zone", "Example: Europe/Istanbul", "Time Zone Abbreviation", "Example: +03", "Select Unit", "Metric", "Imperial", "Update Interval (Minutes)", "Example: 30", "Save", "Go to Homepage", "Please enter district, city, country and OpenCage API key.", "Location not found.", "API request failed.", "SSID", "Enter WiFi network name", "Password", "Enter WiFi password", "Username", "Enter username", "Enter password", "Default Settings", "Restore to default settings. Device is restarting...", "Restore to Default Settings", "The device will be reset to default settings. Continue?", "Hide", "JSON parsing error", "Settings file not found.", "Import Settings", "Settings loaded successfully. Device is restarting...", "Failed to create file.", "Failed to open file.", "Invalid JSON: ", "Failed to write settings file.", "Export Settings", "Export All Settings (Download)", "Settings File (.json):", "Load Settings (Import)", "OTA Update", "Turn On Time", "Example: 08:00", "Turn Off Time", "Example: 00:00", "Security information successfully changed.", "Device settings saved successfully. Redirecting to homepage...", "get from", "here", "Forget WiFi Network", "File not found", "Missing 'file' parameter", "World Clock Settings", "World clock settings saved successfully. Redirecting to homepage...", "Get Time Zones for All Cities", "City 1", "Example: Los Angeles", "Example: US", "Example: -7", "Example: America/Los_Angeles", "Example: PST", "City 2", "Example: London", "Example: GB", "Example: 0", "Example: Europe/London", "Example: GMT", "City 3", "Example: Seoul", "Example: KR", "Example: 9", "Example: Asia/Seoul", "Example: KST", "Please enter the OpenCage API key.", "Missing city or country:", "Currency Rate Settings", "Values are updated daily by the API.", "Currency Rate 1", "Base Currency", "Target Currency", "Currency Rate 2", "Currency exchange settings saved successfully. Redirecting to homepage...", "Failed to load currency list:"};
+const char* UV_INDEX_TEXT[] = {"GOOD", "MODERATE", "HIGH", "VERY HIGH", "EXTREME"};
 
-String NIGHT_MODE_TEXT[] = {"NIGHT MODE", "IS STARTING", "IS FINISHED"};
+const char* PROGRESS_TEXT[] = {"Updating times...", "Updating OWM...", "Updating astronomy...", "Updating OpenMeteo...", "Updating FloatRates...","Done..."};
 
-String LOG_TEXT[] = {"WEATHER STATION", "Signal Strength (RSSI): ", "Use this URL : ", "Setting readyForUpdate to true", "Display was turned ON: ", "Display was turned OFF: ", "Time to turn display on: ", "Time to turn display off: ", "deserializeJson() failed: ", "Entered config mode", "Please connect to AP", "To setup WiFi connection", "Device Settings Updated:", "Security Settings Updated:", "There is no file with that name.", "The configuration files have been downloaded.", "World Clock Settings Updated:", "Currency Rate Settings Updated:"};
+const char *TIME_UPDATE_TEXT[] = {"NEXT", "UPDATE"};
+
+const char* NIGHT_MODE_TEXT[] = {"NIGHT MODE", "IS STARTING", "IS FINISHED"};
+
+const char* OTA_TEXT[] = {"OTA", "IS STARTING", "IS FINISHED", "IS UPLOADING", "ERROR"};
+
+const char* HTML_TEXT[] = {"ESP8266 Weather Station ", "Device Settings", "Security Settings", "OpenWeatherMap API Key", "Enter your API key", "Show", "OpenCage API Key", "City Name", "Example: Istanbul", "Country Name", "Example: Turkey", "Find Location/Timezone from City", "Latitude", "Example: 41.17", "Longitude", "Example: 28.86", "Time Zone", "Select Unit", "Metric", "Imperial", "Update Interval (Minutes)", "Save", "Go to Homepage", "Please enter city, country and OpenCage API key.", "Location not found.", "API request failed.", "About", "Password", "Username", "Enter username", "Enter password", "Default Settings", "Restore to default settings. The device is restarting...", "Restore to Default Settings", "The device will be reset to default settings. Continue?", "Hide", "OTA Update", "Turn On Time", "Turn Off Time", "Security information successfully changed.", "Device settings saved successfully. Redirecting to homepage...", "get from", "here", "Currency Rate Settings", "Values are updated daily by the API.", "Currency Rate 1", "Base Currency", "Target Currency", "Currency Rate 2", "Currency exchange settings saved successfully. Redirecting to homepage...", "Failed to load currency list:", "Flip display orientation", "Saving...", "Base Currency and Target Currency cannot be the same", "Currency Rate", "Display Settings", "Display settings saved successfully. Redirecting to homepage...", "API Key Settings", "API keys saved successfully. Redirecting to homepage...", "Time zone not found", "Time zones could not be retrieved: ", "Time zones could not be loaded.", "Display Contrast"};
+
+const char* LOG_TEXT[] = {"WEATHER STATION", "Signal Strength (RSSI): ", "Use this URL : ", "Setting readyForUpdate to true", "Display was turned on: ", "Display was turned off: ", "Time to turn display on: ", "Time to turn display off: ", "deserializeJson() failed: ", "Entered config mode", "Please connect to AP", "To setup WiFi connection", "Device Settings Updated:", "Security Settings Updated:", "There is no file with that name.", "Currency Rate Settings Updated:", "OTA update started!", "OTA Progress", "Current", "Final", "OTA update finished successfully!", "There was an error during OTA update!", "API Keys Updated:", "Waiting for NTP time...", "Time synchronized."};

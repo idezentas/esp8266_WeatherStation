@@ -47,7 +47,7 @@ void FloatRates::doUpdate(FloatRatesData *data, String path, String myTargetCurr
   this->data->targetName = myTargetCurrency;
   JsonStreamingParser parser;
   parser.setListener(this);
-  Serial.printf("[HTTP] Requesting resource at http://%s:%u%s\n", host, port, path.c_str());
+  Serial.printf_P(PSTR("[HTTP] Requesting resource at http://%s:%u%s\n"), host.c_str(), port, path.c_str());
 
   WiFiClient client;
 
@@ -58,7 +58,7 @@ void FloatRates::doUpdate(FloatRatesData *data, String path, String myTargetCurr
 #endif
     bool isBody = false;
     char c;
-    Serial.println("[HTTP] connected, now GETting data");
+    Serial.println(F("[HTTP] connected, now GETting data"));
     client.print("GET " + path + " HTTP/1.1\r\n"
                                  "Host: "
                  + host + "\r\n"
@@ -67,9 +67,8 @@ void FloatRates::doUpdate(FloatRatesData *data, String path, String myTargetCurr
     while (client.connected() || client.available()) {
       if (client.available()) {
         if ((millis() - lost_do) > lostTest) {
-          Serial.println("[HTTP] lost in client with a timeout");
+          Serial.println(F("[HTTP] lost in client with a timeout"));
           client.stop();
-          ESP.restart();
         }
         c = client.read();
         if (c == '{' || c == '[') {
@@ -84,17 +83,17 @@ void FloatRates::doUpdate(FloatRatesData *data, String path, String myTargetCurr
     }
     client.stop();
   } else {
-    Serial.println("[HTTP] failed to connect to host");
+    Serial.println(F("[HTTP] failed to connect to host"));
   }
   this->data = nullptr;
 }
 
 void FloatRates::whitespace(char c) {
-  Serial.println("whitespace");
+  Serial.println(F("whitespace"));
 }
 
 void FloatRates::startDocument() {
-  Serial.println("start document");
+  Serial.println(F("start document"));
 }
 
 void FloatRates::key(String key) {
@@ -105,17 +104,12 @@ void FloatRates::value(String value) {
   // "date": "Fri, 1 Aug 2025 23:59:00 GMT",
   if (currentParent == this->data->targetName && currentKey == "date") {
     this->data->date = value;
-    Serial.printf("date: %s\n", value.c_str());
+    Serial.printf_P(PSTR("date: %s\n"), value.c_str());
   }
   // Ex: "rate": 1.1452916771944,
   if (currentParent == this->data->targetName && currentKey == "rate") {
     this->data->rate = value.toFloat();
-    Serial.printf("target (%s): %f\n", this->data->targetName.c_str(), value.toFloat());
-  }
-  // Ex: "inverseRate": 0.87314002180623
-  if (currentParent == this->data->targetName && currentKey == "inverseRate") {
-    this->data->inverseRate = value.toFloat();
-    Serial.printf("target (%s) (inverse): %f\n", this->data->targetName.c_str(), value.toFloat());
+    Serial.printf_P(PSTR("target (%s): %.2f\n"), this->data->targetName.c_str(), value.toFloat());
   }
 }
 

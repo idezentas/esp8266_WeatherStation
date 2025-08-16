@@ -56,7 +56,7 @@ void OpenWeatherMapCurrent::doUpdate(OpenWeatherMapCurrentData *data, String pat
   this->data = data;
   JsonStreamingParser parser;
   parser.setListener(this);
-  Serial.printf("[HTTP] Requesting resource at http://%s:%u%s\n", host.c_str(), port, path.c_str());
+  Serial.printf_P(PSTR("[HTTP] Requesting resource at http://%s:%u%s\n"), host.c_str(), port, path.c_str());
 
   WiFiClient client;
   #if defined(ESP8266)
@@ -66,7 +66,7 @@ void OpenWeatherMapCurrent::doUpdate(OpenWeatherMapCurrentData *data, String pat
   #endif
     bool isBody = false;
     char c;
-    Serial.println("[HTTP] connected, now GETting data");
+    Serial.println(F("[HTTP] connected, now GETting data"));
     client.print("GET " + path + " HTTP/1.1\r\n"
                  "Host: " + host + "\r\n"
                  "Connection: close\r\n\r\n");
@@ -74,9 +74,8 @@ void OpenWeatherMapCurrent::doUpdate(OpenWeatherMapCurrentData *data, String pat
     while (client.connected() || client.available()) {
       if (client.available()) {
         if ((millis() - lost_do) > lostTest) {
-          Serial.println("[HTTP] lost in client with a timeout");
+          Serial.println(F("[HTTP] lost in client with a timeout"));
           client.stop();
-          ESP.restart();
         }
         c = client.read();
         if (c == '{' || c == '[') {
@@ -91,17 +90,17 @@ void OpenWeatherMapCurrent::doUpdate(OpenWeatherMapCurrentData *data, String pat
     }
     client.stop();
   } else {
-    Serial.println("[HTTP] failed to connect to host");
+    Serial.println(F("[HTTP] failed to connect to host"));
   }
   this->data = nullptr;
 }
 
 void OpenWeatherMapCurrent::whitespace(char c) {
-  Serial.println("whitespace");
+  Serial.println(F("whitespace"));
 }
 
 void OpenWeatherMapCurrent::startDocument() {
-  Serial.println("start document");
+  Serial.println(F("start document"));
 }
 
 void OpenWeatherMapCurrent::key(String key) {
@@ -112,39 +111,39 @@ void OpenWeatherMapCurrent::value(String value) {
   // "lon": 8.54, float lon;
   if (currentKey == "lon") {
     this->data->lon = value.toFloat();
-    Serial.printf("lon: %f\n", value.toFloat());
+    Serial.printf_P(PSTR("lon: %.2f\n"), value.toFloat());
   }
   // "lat": 47.37 float lat;
   if (currentKey == "lat") {
     this->data->lat = value.toFloat();
-    Serial.printf("lat: %f\n", value.toFloat());
+    Serial.printf_P(PSTR("lat: %.2f\n"), value.toFloat());
   }
   // weatherItemCounter: only get the first item if more than one is available
   if (currentParent == "weather" && weatherItemCounter == 0) {
     // "id": 521, weatherId weatherId;
     if (currentKey == "id") {
       this->data->weatherId = value.toInt();
-      Serial.printf("weatherId: %ld\n", value.toInt());
+      Serial.printf_P(PSTR("weatherId: %ld\n"), value.toInt());
     }
     // "main": "Rain", String main;
     if (currentKey == "main") {
       this->data->main = value;
-      Serial.printf("main: %s\n", value.c_str());
+      Serial.printf_P(PSTR("main: %s\n"), value.c_str());
     }
     // "description": "shower rain", String description;
     if (currentKey == "description") {
       this->data->description = value;
       this->data->descriptionClean = UpperText(CleanText(value).c_str());
-      Serial.printf("description: %s\n", value.c_str());
-      Serial.printf("descriptionClean: %s\n", UpperText(CleanText(value)).c_str());
+      Serial.printf_P(PSTR("description: %s\n"), value.c_str());
+      Serial.printf_P(PSTR("descriptionClean: %s\n"), UpperText(CleanText(value)).c_str());
     }
     // "icon": "09d" String icon;
    //String iconMeteoCon;
     if (currentKey == "icon") {
       this->data->icon = value;
       this->data->iconMeteoCon = getMeteoconIcon(value);
-      Serial.printf("icon: %s\n", value.c_str());
-      Serial.printf("iconMeteoCon: %s\n", getMeteoconIcon(value).c_str());
+      Serial.printf_P(PSTR("icon: %s\n"), value.c_str());
+      Serial.printf_P(PSTR("iconMeteoCon: %s\n"), getMeteoconIcon(value).c_str());
     }
 
   }
@@ -152,77 +151,62 @@ void OpenWeatherMapCurrent::value(String value) {
   // "temp": 290.56, float temp;
   if (currentKey == "temp") {
     this->data->temp = value.toFloat();
-    Serial.printf("temp: %f\n", value.toFloat());
+    Serial.printf_P(PSTR("temp: %.2f\n"), value.toFloat());
   }
   // "feels_like": 290.87, float feelsLike;
   if (currentKey == "feels_like") {
     this->data->feelsLike = value.toFloat();
-    Serial.printf("feelsLike: %f\n", value.toFloat());
+    Serial.printf_P(PSTR("feelsLike: %.2f\n"), value.toFloat());
   }
   // "pressure": 1013, uint16_t pressure;
   if (currentKey == "pressure") {
     this->data->pressure = value.toInt();
-    Serial.printf("pressure: %ld\n", value.toInt());
+    Serial.printf_P(PSTR("pressure: %ld\n"), value.toInt());
   }
   // "humidity": 87, uint8_t humidity;
   if (currentKey == "humidity") {
     this->data->humidity = value.toInt();
-    Serial.printf("humidity: %ld\n", value.toInt());
+    Serial.printf_P(PSTR("humidity: %ld\n"), value.toInt());
   }
   // "temp_min": 289.15, float tempMin;
   if (currentKey == "temp_min") {
     this->data->tempMin = value.toFloat();
-    Serial.printf("tempMin: %f\n", value.toFloat());
+    Serial.printf_P(PSTR("tempMin: %.2f\n"), value.toFloat());
   }
   // "temp_max": 292.15 float tempMax;
   if (currentKey == "temp_max") {
     this->data->tempMax = value.toFloat();
-    Serial.printf("tempMax: %f\n", value.toFloat());
-  }
-  // visibility: 10000, uint16_t visibility;
-  if (currentKey == "visibility") {
-    this->data->visibility = value.toInt();
-    Serial.printf("visibility: %ld\n", value.toInt());
+    Serial.printf_P(PSTR("tempMax: %.2f\n"), value.toFloat());
   }
   // "wind": {"speed": 1.5}, float windSpeed;
   if (currentKey == "speed") {
     this->data->windSpeed = value.toFloat();
-    Serial.printf("windSpeed: %f\n", value.toFloat());
+    Serial.printf_P(PSTR("windSpeed: %.2f\n"), value.toFloat());
   }
   // "wind": {deg: 226.505}, float windDeg;
   if (currentKey == "deg") {
     this->data->windDeg = value.toFloat();
-    Serial.printf("windDeg: %f\n", value.toFloat());
+    Serial.printf_P(PSTR("windDeg: %.2f\n"), value.toFloat());
   }
   // "clouds": {"all": 90}, uint8_t clouds;
   if (currentKey == "all") {
     this->data->clouds = value.toInt();
-    Serial.printf("clouds: %ld\n", value.toInt());
+    Serial.printf_P(PSTR("clouds: %ld\n"), value.toInt());
   }
   // "dt": 1527015000, uint64_t observationTime;
   if (currentKey == "dt") {
     this->data->observationTime = value.toInt();
-    Serial.printf("observationTime: %ld\n", value.toInt());
-  }
-  // "country": "CH", String country;
-  if (currentKey == "country") {
-    this->data->country = value;
-    Serial.printf("country: %s\n", value.c_str());
+    Serial.printf_P(PSTR("observationTime: %ld\n"), value.toInt());
   }
   // "sunrise": 1526960448, uint32_t sunrise;
   if (currentKey == "sunrise") {
     this->data->sunrise = value.toInt();
-    Serial.printf("sunrise: %ld\n", value.toInt());
+    Serial.printf_P(PSTR("sunrise: %ld\n"), value.toInt());
   }
   // "sunset": 1527015901 uint32_t sunset;
   if (currentKey == "sunset") {
     this->data->sunset = value.toInt();
-    Serial.printf("sunset: %ld\n", value.toInt());
-  }
-  // "name": "Zurich", String cityName;
-  if (currentKey == "name") {
-    this->data->cityName = value;
-    Serial.printf("cityName: %s\n", value.c_str());
+    Serial.printf_P(PSTR("sunset: %ld\n"), value.toInt());
   }
 }
 

@@ -52,8 +52,6 @@ typedef struct OpenWeatherMapCurrentData {
   float tempMin;
   // "temp_max": 292.15
   float tempMax;
-  // visibility: 10000,
-  uint16_t visibility;
   // "wind": {"speed": 1.5},
   float windSpeed;
   // "wind": {deg: 226.505},
@@ -62,14 +60,10 @@ typedef struct OpenWeatherMapCurrentData {
   uint8_t clouds;
   // "dt": 1527015000,
   uint32_t observationTime;
-  // "country": "CH",
-  String country;
   // "sunrise": 1526960448,
   uint32_t sunrise;
   // "sunset": 1527015901
   uint32_t sunset;
-  // "name": "Zurich",
-  String cityName;
 } OpenWeatherMapCurrentData;
 
 class OpenWeatherMapCurrent: public JsonListener {
