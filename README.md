@@ -7,16 +7,17 @@ Bu proje, [ThingPulse - WeatherStationDemo](https://github.com/ThingPulse/esp826
 ## Özellikler
 
 - Senkron Web Sunucusu ile kullanıcı dostu web arayüzü
-- Ayarlar Sayfaları: Cihaz, Güvenlik, Dünya Saatleri, Döviz Kurları ve Varsayılanlara sıfırlama
+- Ayarlar Sayfaları: Cihaz, Güvenlik, API Anahtarları, Ekran, Döviz Kurları ve Varsayılan ayarlara sıfırlama
 - OTA Güncelleme: ElegantOTA ile uzaktan yazılım güncellemeleri
 - WiFiManager: Gömülü Wi-Fi adı/şifresi gerekmeden yapılandırma
-- Anlık Hava Durumu & Hava Kalitesi (AQI): OpenWeatherMap üzerinden
+- Anlık Hava Durumu & Hava Kalitesi (AQI): OpenWeatherMap üzerinden alınmaktadır.
 - UV İndeksi: Open-Meteo API'den gerçek zamanlı UV bilgisi
-- Döviz Kurları: Floatrates API üzerinden
-- Saat & Tarih Gösterimi: NTP sunucusu üzerinden
-- Gece Modu (Donanımsal): Belirtilen saatlerde OLED ekran otomatik kapanır/açılır
+- Döviz Kurları: Floatrates API üzerinden alınmaktadır.
+- Saat & Tarih Gösterimi: NTP sunucusu üzerinden alınmaktadır. Otomatik yaz saati uyumluluğu bulunmaktadır.
+- Gece Modu : Belirtilen saatlerde OLED ekran otomatik açılır/kapanır.
+- Ekran Döndürme: OLED ekranı dikey olarak döndürme
 - Tema Desteği: Web arayüzünde açık ve koyu tema seçeneği (Tema seçimi otomatik olarak sistemde kullanan tema aynı olacaktır.)
-- Mobil Uyumlu Arayüz: Tüm cihazlarda uyumlu responsive tasarım
+- Mobil Uyumlu Arayüz: Tüm cihazlarda uyumlu tasarım
 - Çoklu Dil Desteği: Şu anda **Türkçe** ve **İngilizce** arayüz seçeneği
 
 ## Web Arayüzü Ekran görüntüleri
@@ -25,9 +26,17 @@ Ana Sayfa
 
 <img src="images/home-tr.png" alt="Ana Sayfa" width="300"/>
 
+API Anahtar Ayarları
+
+<img src="images/apikeys-tr.png" alt="API Anahtar Ayarları" width="300"/>
+
 Cihaz Ayarları
 
 <img src="images/device-tr.png" alt="Cihaz Ayarları" width="300"/>
+
+Ekran Ayarları
+
+<img src="images/display-tr.png" alt="Ekran Ayarları" width="300"/>
 
 Güvenlik Ayarları
 
@@ -70,10 +79,17 @@ Döviz Kuru Ayarları
 
 - Ayar sayfalarına gitmek istediğinizde sizden kullanıcı adı ve şifre isteyecektir. Varsayılan kullanıcı adı: `admin` ve varsayılan şifre: `esp8266` olarak belirlenmiştir. Değiştirmek istediğiniz zaman **Güvenlik Ayarları** sayfasından değiştirebilirsiniz.
 
-- Web arayüzü üzerinden önce **Cihaz Ayarları** sayfasına giderek:
+- Web arayüzü üzerinden önce **API Anahtar Ayarları** sayfasına giderek:
   - OpenWeatherMap ve OpenCage API anahtarlarını giriniz.
-  - İlçe, Şehir adlarını ve Ülke kodunu girip **Şehirden Konum/Zaman Bul** butonuna tıklayınız. Size otomatik olarak diğer gerekli ayarları yapacaktır.
-  - Güncelleme sıklığı dakika olarak giriniz.
+  - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir.
+
+- Daha sonra web arayüzü üzerinden önce **Cihaz Ayarları** sayfasına giderek:
+  - Şehir ve Ülke adlarını girip **Şehirden Konum/Zaman Bul** butonuna tıklayınız. Size otomatik olarak diğer gerekli ayarları yapacaktır.
+  - Güncelleme sıklığı seçiniz.
+  - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir. Aynı zamanda OLED ekranda yeni değerler ile veriler güncellenecektir.
+
+- Daha sonra web arayüzü üzerinden önce **Ekran Ayarları** sayfasına giderek:
+  - Sırasıyla ekran yönünü, saat formatını ve ay gösterim formatını seçiniz.
   - Gece modu zamanlaması için açılış ve kapanış zamanlarını giriniz.
   - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir. Aynı zamanda OLED ekranda yeni değerler ile veriler güncellenecektir.
 
@@ -115,5 +131,6 @@ Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutoria
 - Saat: [NTP Sunucuları](https://pool.ntp.org)  
 - WiFi Kurulumu: [WiFiManager](https://github.com/tzapu/WiFiManager)  
 - Döviz Verisi: [Floatrates](https://www.floatrates.com)  
-- Gece Modu Özelliği: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
+- Gece Modu ve Ekran Döndürme Özelliği: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
 - JSON: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) ve [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+- Zaman Dilimleri [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)

@@ -7,14 +7,15 @@ This project is based on the [ThingPulse - WeatherStationDemo](https://github.co
 ## Features
 
 - Synchronous Web Server with a user-friendly web interface
-- Settings Pages: Configure device, security, world clocks, currency and restore defaults
+- Settings Pages: Device, Security, API Keys, Display, Currency Rates, and Restore to Default Settings
 - OTA Updates: Remote firmware updates with ElegantOTA v3
 - WiFiManager: No hardcoded Wi-Fi credentials required
 - Live Weather & Air Quality (AQI): From OpenWeatherMap
 - UV Index: Real-time UV data from Open-Meteo API
 - Currency Rates: From Floatrates API
-- Time & Date Display: Synced using NTP servers
-- Night Mode (Hardware): OLED screen turns off/on automatically based on configured time
+- Time & Date Display: Synced using NTP servers. Automatic daylight saving time compatibility is available.
+- Night Mode: OLED screen turns off/on automatically based on configured time
+- Display Rotation: Flip the OLED screen vertically
 - Theme Support: Light and dark theme options in the web interface (The theme selection will automatically be the same as the theme used in the system.)
 - Mobile-Friendly Interface: Fully responsive design
 - Multi-language Support: Currently supports **Turkish** and **English**
@@ -25,9 +26,17 @@ Home Page
 
 <img src="images/home-en.png" alt="Home Page" width="300"/>
 
+API Key Settings
+
+<img src="images/apikeys-en.png" alt="API Key Settings" width="300"/>
+
 Device Settings
 
 <img src="images/device-en.png" alt="Device Settings" width="300"/>
+
+Display Settings
+
+<img src="images/display-en.png" alt="Display Settings" width="300"/>
 
 Security Settings
 
@@ -70,12 +79,19 @@ Currency Settings
 
 - When you want to go to the settings pages, you will be asked for a username and password. The default username is `admin` and the default password is `esp8266`. You can change them from the **Security Settings** page if you wish.
 
-- First, go to the **Device Settings** page via the web interface:
+- First, go to the **API Key Settings** page via the web interface:
   - Enter the OpenWeatherMap and OpenCage API keys.
-  - Enter the district, city names, and country code, then click the **Find Location/Time from City** button. It will automatically configure the other necessary settings for you.
+  - Click the **Save** button. After clicking, you will be automatically redirected to the home page.
+
+- Then, go to the **Device Settings** page via the web interface:
+  - Enter the city, country names then click the **Find Location/Time from City** button. It will automatically configure the other necessary settings for you.
   - Enter the update frequency in minutes.
-  - Enter the start and end times for night mode scheduling.
   - Click the **Save** button. After clicking, you will be automatically redirected to the main page. At the same time, the data will be updated with new values on the OLED screen.
+
+- Then, go to the **Display Settings** page via the web interface:
+  - Select the display orientation, time format, and month display format in that order.
+  - Enter the turn on and turn off times for night mode scheduling.  
+  - Click the **Save** button. After clicking, you will be automatically redirected to the home page. At the same time, the data will be updated with the new values on the OLED screen.
 
 - Then, go to the **Currency Rate Settings** page via the web interface:
   - Select the base currency and target currency for 2 currency exchange rates.
@@ -115,5 +131,6 @@ Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/e
 - Time Sync: [NTP Servers](https://pool.ntp.org)  
 - WiFi Config Portal: [WiFiManager](https://github.com/tzapu/WiFiManager)  
 - Currency Data: [Floatrates](https://www.floatrates.com)  
-- Night Mode Feature: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
+- Night Mode and Display Rotation Feature: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
 - JSON: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) and [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+- Timezones [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)
