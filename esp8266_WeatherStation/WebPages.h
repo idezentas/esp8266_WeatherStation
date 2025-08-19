@@ -132,6 +132,10 @@ static const char Home_Page[] PROGMEM = R"rawliteral(
         <button type="submit">
           <i class="fas fa-money-bill"></i> %CURRENCYSETTINGS% </button>
       </form>
+      <form action="/updatedata" method="GET">
+        <button type="submit">
+          <i class="fas fa-cloud-download-alt"></i> %UPDATEDATATEXT% </button>
+      </form>
       <form action="/resetdefault" method="GET" id="resetForm">
         <button type="submit">
           <i class="fas fa-undo-alt"></i> %DEFAULTSETTINGS% </button>
@@ -924,9 +928,8 @@ static const char Display_Settings_Page[] PROGMEM = R"rawliteral(
             margin-bottom: 0.8rem;
             font-size: 1.3rem;
             color: var(--accent-color);
-            margin-top: 2rem;
+            margin-top: 1rem;
         }
-
     </style>
 </head>
 
@@ -940,16 +943,31 @@ static const char Display_Settings_Page[] PROGMEM = R"rawliteral(
                 </label>
             </div>
             <div class="setting">
+                <label for="setConstrast">%DISPLAYCONTRAST%</label>
+                <input type="range" id="setConstrast" name="setConstrast" required value="%SETCONTRAST%" min=0 max=255>
+            </div>
+            <div class="setting">
+                <label for="hours">%HOURTEXT%</label>
+                <select id="hours" name="hours">
+                    <option value="hour24" %HOUR24%>%HOUR24TEXT%</option>
+                    <option value="hour12" %HOUR12%>%HOUR12TEXT%</option>
+                </select>
+            </div>
+            <div class="setting">
+                <label for="months">%MONTHTEXT%</label>
+                <select id="months" name="months">
+                    <option value="asName" %ASNAME%>%ASNAMETEXT%</option>
+                    <option value="asNumber" %ASNUMBER%>%ASNUMBERTEXT%</option>
+                </select>
+            </div>
+            <div class="setting">
+                <div class="centered-text">%TIMEWARNINGTEXT%</div>
                 <label for="turnOnTime">%TIMEONTEXT%</label>
                 <input type="time" id="turnOnTime" name="turnOnTime" required value="%TIMEON%">
             </div>
             <div class="setting">
                 <label for="turnOffTime">%TIMEOFFTEXT%</label>
                 <input type="time" id="turnOffTime" name="turnOffTime" required value="%TIMEOFF%">
-            </div>
-            <div class="setting">
-                <label for="setConstrast">%DISPLAYCONTRAST%</label>
-                <input type="range" id="setConstrast" name="setConstrast" required value="%SETCONTRAST%" min=0 max=255>
             </div>
             <div class="buttons">
                 <button type="submit" id="submitBtn">
