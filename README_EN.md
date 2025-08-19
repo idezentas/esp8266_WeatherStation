@@ -14,7 +14,6 @@ This project is based on the [ThingPulse - WeatherStationDemo](https://github.co
 - UV Index: Real-time UV data from Open-Meteo API
 - Currency Rates: From Floatrates API
 - Time & Date Display: Synced using NTP servers
-- World Clock: View current time in multiple cities
 - Night Mode (Hardware): OLED screen turns off/on automatically based on configured time
 - Theme Support: Light and dark theme options in the web interface (The theme selection will automatically be the same as the theme used in the system.)
 - Mobile-Friendly Interface: Fully responsive design
@@ -33,10 +32,6 @@ Device Settings
 Security Settings
 
 <img src="images/security-en.png" alt="Security Settings" width="300"/>
-
-World Clock Settings
-
-<img src="images/worldclock-en.png" alt="World Clock Settings" width="300"/>
 
 Currency Settings
 
@@ -81,10 +76,6 @@ Currency Settings
   - Enter the update frequency in minutes.
   - Enter the start and end times for night mode scheduling.
   - Click the **Save** button. After clicking, you will be automatically redirected to the main page. At the same time, the data will be updated with new values on the OLED screen.
-
-- Then, go to the **World Clock Settings** page via the web interface:
-  - For 3 cities, you only need to enter the city name and country code. Then click the **Get Time Zones for All Cities** button. It will automatically make the necessary settings for you.
-  - Click the **Save** button. After clicking, it will automatically redirect you to the main page.
 
 - Then, go to the **Currency Rate Settings** page via the web interface:
   - Select the base currency and target currency for 2 currency exchange rates.

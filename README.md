@@ -14,7 +14,6 @@ Bu proje, [ThingPulse - WeatherStationDemo](https://github.com/ThingPulse/esp826
 - UV İndeksi: Open-Meteo API'den gerçek zamanlı UV bilgisi
 - Döviz Kurları: Floatrates API üzerinden
 - Saat & Tarih Gösterimi: NTP sunucusu üzerinden
-- Dünya Saati: Farklı şehirlerin saatlerini gösterme
 - Gece Modu (Donanımsal): Belirtilen saatlerde OLED ekran otomatik kapanır/açılır
 - Tema Desteği: Web arayüzünde açık ve koyu tema seçeneği (Tema seçimi otomatik olarak sistemde kullanan tema aynı olacaktır.)
 - Mobil Uyumlu Arayüz: Tüm cihazlarda uyumlu responsive tasarım
@@ -33,10 +32,6 @@ Cihaz Ayarları
 Güvenlik Ayarları
 
 <img src="images/security-tr.png" alt="Güvenlik Ayarları" width="300"/>
-
-Dünya Saati Ayarları
-
-<img src="images/worldclock-tr.png" alt="Dünya Saati Ayarları" width="300"/>
 
 Döviz Kuru Ayarları
 
@@ -81,10 +76,6 @@ Döviz Kuru Ayarları
   - Güncelleme sıklığı dakika olarak giriniz.
   - Gece modu zamanlaması için açılış ve kapanış zamanlarını giriniz.
   - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir. Aynı zamanda OLED ekranda yeni değerler ile veriler güncellenecektir.
-
-- Daha sonra web arayüzü üzerinden önce **Dünya Saati Ayarları** sayfasına giderek:
-  - 3 tane şehir için sadece Şehir adı ve Ülke kodunu girmeniz yeterlidir. Daha sonra **Tüm Şehirlerin Zaman Dilimlerini Bul** butona tıklayınız. Size otomatik olarak diğer gerekli ayarları yapacaktır.
-  - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir.
 
 - Daha sonra web arayüzü üzerinden önce **Döviz Kurları Ayarları** sayfasına giderek:
   - 2 tane döviz kuru için temel para birimi ve hedef para birimi seçiniz.
