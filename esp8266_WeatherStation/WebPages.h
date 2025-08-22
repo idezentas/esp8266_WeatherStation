@@ -9,17 +9,6 @@ static const char Home_Page[] PROGMEM = R"rawliteral(
   <title>%HOMETITLE%</title>
   <style>
     :root {
-      --bg-color: #ffffff;
-      --text-color: #333333;
-      --input-bg: #f0f0f0;
-      --button-bg: #388e3c;
-      --button-text: #ffffff;
-      --accent-color: #66bb6a;
-      --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-    }
-
-    @media (prefers-color-scheme: dark) {
-      :root {
         --bg-color: #121212;
         --text-color: #eeeeee;
         --input-bg: #2a2a2a;
@@ -27,7 +16,6 @@ static const char Home_Page[] PROGMEM = R"rawliteral(
         --button-text: #ffffff;
         --accent-color: #66bb6a;
         --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-      }
     }
 
     body {
@@ -48,7 +36,7 @@ static const char Home_Page[] PROGMEM = R"rawliteral(
     h1 {
       text-align: center;
       font-size: 1.6rem;
-      margin-bottom: 1.5rem;
+      margin-bottom: 1.2rem;
       color: var(--accent-color);
       text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
     }
@@ -187,25 +175,13 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
     <title>%DEVICESETTINGS%</title>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --input-bg: #f0f0f0;
+            --bg-color: #121212;
+            --text-color: #eeeeee;
+            --input-bg: #2a2a2a;
             --button-bg: #388e3c;
             --button-text: #ffffff;
             --accent-color: #66bb6a;
             --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #121212;
-                --text-color: #eeeeee;
-                --input-bg: #2a2a2a;
-                --button-bg: #388e3c;
-                --button-text: #ffffff;
-                --accent-color: #66bb6a;
-                --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-            }
         }
 
         html,
@@ -327,6 +303,86 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
             visibility: visible;
             opacity: 1;
         }
+
+        .overlay {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow-x: hidden;
+            transition: 0.5s;
+        }
+
+        .overlay-content {
+            position: relative;
+            top: 10%;
+            width: 100%;
+            margin-top: 0;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay-content a {
+            display: block;
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 36px;
+            color: #818181;
+            margin: 5px 0;
+            transition: 0.3s;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .overlay a:hover,
+        .overlay a:focus {
+            color: #f1f1f1;
+        }
+
+        .overlay .closebtn {
+            position: absolute;
+            top: 20px;
+            right: 45px;
+            font-size: 60px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @media screen and (max-height: 450px) {
+            .overlay a {
+                font-size: 20px
+            }
+
+            .overlay .closebtn {
+                font-size: 40px;
+                top: 15px;
+                right: 35px;
+            }
+        }
+
+        .menu-icon {
+            font-size: 30px;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+        }
+
+        @media screen and (max-width: 600px) {
+            .menu-icon {
+                top: 15px;
+                right: 15px;
+            }
+
+            h1 {
+                padding-top: 60px;
+            }
+        }
     </style>
 </head>
 
@@ -361,8 +417,13 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
                         inputmode="decimal">
                 </div>
                 <div class="setting">
+                    <button type="button" onclick="openMap()">
+                        <i class='fas fa-map-marker' style='color:red'></i> %SHOWMAPTEXT%
+                    </button>
+                </div>
+                <div class="setting">
                     <label for="timezoneName">%TZNAMETEXT%</label>
-                    <select id="timezoneName">
+                    <select id="timezoneName" name="timezoneName">
                         <option>...</option>
                     </select>
                 </div>
@@ -394,15 +455,20 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
                     </button>
                 </div>
         </form>
-        <form action="/" method="GET">
-            <div class="buttons">
-                <button type="submit">
-                    <i class="fas fa-home"></i> %GOHOMETEXT%
-                </button>
-            </div>
-        </form>
     </main>
-
+    <div id="myNav" class="overlay">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="overlay-content">
+            <a href="/"><i class="fas fa-home"></i> %HOMETEXT%</a>
+            <a href="/apikey"><i class="fas fa-key"></i> %APIKEYSETTINGS%</a>
+            <a href="/display"><i class="fas fa-desktop"></i> %DISPLAYSETTINGS%</a>
+            <a href="/security"><i class="fas fa-lock"></i> %SECURITYSETTINGS%</a>
+            <a href="/currency"><i class="fas fa-money-bill"></i> %CURRENCYSETTINGS%</a>
+            <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
+            <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
+        </div>
+    </div>
+    <span id="menuIcon" class="menu-icon" onclick="openNav()">&#9776;</span>
     <script>
         const ZONES_URL = 'https://raw.githubusercontent.com/idezentas/esp8266_WeatherStation/refs/heads/main/zones.json';
         const selectTz = document.getElementById('timezoneName');
@@ -531,6 +597,44 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
             selectTz.appendChild(opt);
             posixInput.value = '';
         });
+
+        function openNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            overlay.style.width = "100%";
+            document.getElementById("menuIcon").style.display = "none";
+
+            setTimeout(() => {
+                content.style.opacity = "1";
+                closeBtn.style.opacity = "1";
+            }, 0);
+        }
+
+        function closeNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            content.style.opacity = "0";
+            closeBtn.style.opacity = "0";
+
+            setTimeout(() => {
+                overlay.style.width = "0%";
+                document.getElementById("menuIcon").style.display = "block";
+            }, 0);
+        }
+        function openMap() {
+            const latitudeInput = document.getElementById('latitude');
+            const longitudeInput = document.getElementById('longitude');
+            const link = `https://www.google.com/maps/@${encodeURIComponent(latitudeInput.value)},${encodeURIComponent(longitudeInput.value)},2532m/data=!3m1!1e3`;
+            if (link) {
+                window.open(link, '_blank');
+            } else {
+                showToast('Lütfen geçerli bir link girin!');
+            }
+        }
     </script>
 </body>
 
@@ -548,25 +652,13 @@ static const char Currency_Page[] PROGMEM = R"rawliteral(
     <title>%CURRENCYSETTINGS%</title>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --input-bg: #f0f0f0;
+            --bg-color: #121212;
+            --text-color: #eeeeee;
+            --input-bg: #2a2a2a;
             --button-bg: #388e3c;
             --button-text: #ffffff;
             --accent-color: #66bb6a;
             --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #121212;
-                --text-color: #eeeeee;
-                --input-bg: #2a2a2a;
-                --button-bg: #388e3c;
-                --button-text: #ffffff;
-                --accent-color: #66bb6a;
-                --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-            }
         }
 
         html,
@@ -686,6 +778,86 @@ static const char Currency_Page[] PROGMEM = R"rawliteral(
             visibility: visible;
             opacity: 1;
         }
+
+        .overlay {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow-x: hidden;
+            transition: 0.5s;
+        }
+
+        .overlay-content {
+            position: relative;
+            top: 10%;
+            width: 100%;
+            margin-top: 0;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay-content a {
+            display: block;
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 36px;
+            color: #818181;
+            margin: 5px 0;
+            transition: 0.3s;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .overlay a:hover,
+        .overlay a:focus {
+            color: #f1f1f1;
+        }
+
+        .overlay .closebtn {
+            position: absolute;
+            top: 20px;
+            right: 45px;
+            font-size: 60px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @media screen and (max-height: 450px) {
+            .overlay a {
+                font-size: 20px
+            }
+
+            .overlay .closebtn {
+                font-size: 40px;
+                top: 15px;
+                right: 35px;
+            }
+        }
+
+        .menu-icon {
+            font-size: 30px;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+        }
+
+        @media screen and (max-width: 600px) {
+            .menu-icon {
+                top: 15px;
+                right: 15px;
+            }
+
+            h1 {
+                padding-top: 60px;
+            }
+        }
     </style>
 </head>
 
@@ -719,14 +891,20 @@ static const char Currency_Page[] PROGMEM = R"rawliteral(
                     <i class="fas fa-floppy-disk"></i> %SAVETEXT% </button>
             </div>
         </form>
-        <form action="/" method="GET">
-            <div class="buttons">
-                <button type="submit">
-                    <i class="fas fa-home"></i> %GOHOMETEXT% </button>
-            </div>
-        </form>
     </main>
-
+    <div id="myNav" class="overlay">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="overlay-content">
+            <a href="/"><i class="fas fa-home"></i> %HOMETEXT%</a>
+            <a href="/apikey"><i class="fas fa-key"></i> %APIKEYSETTINGS%</a>
+            <a href="/device"><i class="fas fa-cogs"></i> %DEVICESETTINGS%</a>
+            <a href="/display"><i class="fas fa-desktop"></i> %DISPLAYSETTINGS%</a>
+            <a href="/security"><i class="fas fa-lock"></i> %SECURITYSETTINGS%</a>
+            <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
+            <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
+        </div>
+    </div>
+    <span id="menuIcon" class="menu-icon" onclick="openNav()">&#9776;</span>
     <script>
 
         let lang = "%LANG%".toLowerCase();
@@ -791,6 +969,34 @@ static const char Currency_Page[] PROGMEM = R"rawliteral(
                 showToast("%FORMSENDING%");
             }
         });
+
+        function openNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            overlay.style.width = "100%";
+            document.getElementById("menuIcon").style.display = "none";
+
+            setTimeout(() => {
+                content.style.opacity = "1";
+                closeBtn.style.opacity = "1";
+            }, 0);
+        }
+
+        function closeNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            content.style.opacity = "0";
+            closeBtn.style.opacity = "0";
+
+            setTimeout(() => {
+                overlay.style.width = "0%";
+                document.getElementById("menuIcon").style.display = "block";
+            }, 0);
+        }
     </script>
 </body>
 
@@ -808,25 +1014,13 @@ static const char Display_Settings_Page[] PROGMEM = R"rawliteral(
     <title>%DISPLAYSETTINGS%</title>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --input-bg: #f0f0f0;
+            --bg-color: #121212;
+            --text-color: #eeeeee;
+            --input-bg: #2a2a2a;
             --button-bg: #388e3c;
             --button-text: #ffffff;
             --accent-color: #66bb6a;
             --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #121212;
-                --text-color: #eeeeee;
-                --input-bg: #2a2a2a;
-                --button-bg: #388e3c;
-                --button-text: #ffffff;
-                --accent-color: #66bb6a;
-                --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-            }
         }
 
         html,
@@ -930,6 +1124,86 @@ static const char Display_Settings_Page[] PROGMEM = R"rawliteral(
             color: var(--accent-color);
             margin-top: 1rem;
         }
+
+        .overlay {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow-x: hidden;
+            transition: 0.5s;
+        }
+
+        .overlay-content {
+            position: relative;
+            top: 10%;
+            width: 100%;
+            margin-top: 0;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay-content a {
+            display: block;
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 36px;
+            color: #818181;
+            margin: 5px 0;
+            transition: 0.3s;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .overlay a:hover,
+        .overlay a:focus {
+            color: #f1f1f1;
+        }
+
+        .overlay .closebtn {
+            position: absolute;
+            top: 20px;
+            right: 45px;
+            font-size: 60px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @media screen and (max-height: 450px) {
+            .overlay a {
+                font-size: 20px
+            }
+
+            .overlay .closebtn {
+                font-size: 40px;
+                top: 15px;
+                right: 35px;
+            }
+        }
+
+        .menu-icon {
+            font-size: 30px;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+        }
+
+        @media screen and (max-width: 600px) {
+            .menu-icon {
+                top: 15px;
+                right: 15px;
+            }
+
+            h1 {
+                padding-top: 60px;
+            }
+        }
     </style>
 </head>
 
@@ -974,12 +1248,20 @@ static const char Display_Settings_Page[] PROGMEM = R"rawliteral(
                     <i class="fas fa-floppy-disk"></i> %SAVETEXT% </button>
             </div>
         </form>
-        <form action="/" method="GET">
-            <button type="submit"><i class="fas fa-home"></i> %GOHOMETEXT%</button>
-            </div>
-        </form>
     </main>
-
+    <div id="myNav" class="overlay">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="overlay-content">
+            <a href="/"><i class="fas fa-home"></i> %HOMETEXT%</a>
+            <a href="/apikey"><i class="fas fa-key"></i> %APIKEYSETTINGS%</a>
+            <a href="/device"><i class="fas fa-cogs"></i> %DEVICESETTINGS%</a>
+            <a href="/security"><i class="fas fa-lock"></i> %SECURITYSETTINGS%</a>
+            <a href="/currency"><i class="fas fa-money-bill"></i> %CURRENCYSETTINGS%</a>
+            <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
+            <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
+        </div>
+    </div>
+    <span id="menuIcon" class="menu-icon" onclick="openNav()">&#9776;</span>
     <script>
         const form = document.getElementById('deviceForm');
         const submitBtn = document.getElementById('submitBtn');
@@ -988,6 +1270,34 @@ static const char Display_Settings_Page[] PROGMEM = R"rawliteral(
             submitBtn.disabled = true;
             showToast("%FORMSENDING%");
         });
+
+        function openNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            overlay.style.width = "100%";
+            document.getElementById("menuIcon").style.display = "none";
+
+            setTimeout(() => {
+                content.style.opacity = "1";
+                closeBtn.style.opacity = "1";
+            }, 0);
+        }
+
+        function closeNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            content.style.opacity = "0";
+            closeBtn.style.opacity = "0";
+
+            setTimeout(() => {
+                overlay.style.width = "0%";
+                document.getElementById("menuIcon").style.display = "block";
+            }, 0);
+        }
     </script>
 </body>
 
@@ -1005,25 +1315,13 @@ static const char Security_Page[] PROGMEM = R"rawliteral(
     <title>%SECURITYSETTINGS%</title>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --input-bg: #f0f0f0;
+            --bg-color: #121212;
+            --text-color: #eeeeee;
+            --input-bg: #2a2a2a;
             --button-bg: #388e3c;
             --button-text: #ffffff;
             --accent-color: #66bb6a;
-            --shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #121212;
-                --text-color: #eeeeee;
-                --input-bg: #2a2a2a;
-                --button-bg: #388e3c;
-                --button-text: #ffffff;
-                --accent-color: #66bb6a;
-                --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-            }
+            --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
         }
 
         html,
@@ -1119,6 +1417,86 @@ static const char Security_Page[] PROGMEM = R"rawliteral(
             color: var(--accent-color);
             margin-top: 2rem;
         }
+
+        .overlay {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow-x: hidden;
+            transition: 0.5s;
+        }
+
+        .overlay-content {
+            position: relative;
+            top: 10%;
+            width: 100%;
+            margin-top: 0;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay-content a {
+            display: block;
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 36px;
+            color: #818181;
+            margin: 5px 0;
+            transition: 0.3s;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .overlay a:hover,
+        .overlay a:focus {
+            color: #f1f1f1;
+        }
+
+        .overlay .closebtn {
+            position: absolute;
+            top: 20px;
+            right: 45px;
+            font-size: 60px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @media screen and (max-height: 450px) {
+            .overlay a {
+                font-size: 20px
+            }
+
+            .overlay .closebtn {
+                font-size: 40px;
+                top: 15px;
+                right: 35px;
+            }
+        }
+
+        .menu-icon {
+            font-size: 30px;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+        }
+
+        @media screen and (max-width: 600px) {
+            .menu-icon {
+                top: 15px;
+                right: 15px;
+            }
+
+            h1 {
+                padding-top: 60px;
+            }
+        }
     </style>
 </head>
 
@@ -1143,12 +1521,20 @@ static const char Security_Page[] PROGMEM = R"rawliteral(
                     <i class="fas fa-floppy-disk"></i> %SAVETEXT% </button>
             </div>
         </form>
-        <form action="/" method="GET">
-            <button type="submit"><i class="fas fa-home"></i> %GOHOMETEXT%</button>
-            </div>
-        </form>
     </main>
-
+    <div id="myNav" class="overlay">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="overlay-content">
+            <a href="/"><i class="fas fa-home"></i> %HOMETEXT%</a>
+            <a href="/apikey"><i class="fas fa-key"></i> %APIKEYSETTINGS%</a>
+            <a href="/device"><i class="fas fa-cogs"></i> %DEVICESETTINGS%</a>
+            <a href="/display"><i class="fas fa-desktop"></i> %DISPLAYSETTINGS%</a>
+            <a href="/currency"><i class="fas fa-money-bill"></i> %CURRENCYSETTINGS%</a>
+            <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
+            <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
+        </div>
+    </div>
+    <span id="menuIcon" class="menu-icon" onclick="openNav()">&#9776;</span>
     <script>
         function toggleSecurityPass() {
             const input = document.getElementById("password");
@@ -1168,6 +1554,34 @@ static const char Security_Page[] PROGMEM = R"rawliteral(
             submitBtn.disabled = true;
             showToast("%FORMSENDING%");
         });
+
+        function openNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            overlay.style.width = "100%";
+            document.getElementById("menuIcon").style.display = "none";
+
+            setTimeout(() => {
+                content.style.opacity = "1";
+                closeBtn.style.opacity = "1";
+            }, 0);
+        }
+
+        function closeNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            content.style.opacity = "0";
+            closeBtn.style.opacity = "0";
+
+            setTimeout(() => {
+                overlay.style.width = "0%";
+                document.getElementById("menuIcon").style.display = "block";
+            }, 0);
+        }
     </script>
 </body>
 
@@ -1185,25 +1599,13 @@ static const char ApiKey_Page[] PROGMEM = R"rawliteral(
     <title>%APIKEYSETTINGS%</title>
     <style>
         :root {
-            --bg-color: #ffffff;
-            --text-color: #333333;
-            --input-bg: #f0f0f0;
+            --bg-color: #121212;
+            --text-color: #eeeeee;
+            --input-bg: #2a2a2a;
             --button-bg: #388e3c;
             --button-text: #ffffff;
             --accent-color: #66bb6a;
             --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-        }
-
-        @media (prefers-color-scheme: dark) {
-            :root {
-                --bg-color: #121212;
-                --text-color: #eeeeee;
-                --input-bg: #2a2a2a;
-                --button-bg: #388e3c;
-                --button-text: #ffffff;
-                --accent-color: #66bb6a;
-                --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-            }
         }
 
         html,
@@ -1326,6 +1728,86 @@ static const char ApiKey_Page[] PROGMEM = R"rawliteral(
             visibility: visible;
             opacity: 1;
         }
+
+        .overlay {
+            height: 100%;
+            width: 0;
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            left: 0;
+            background-color: rgba(0, 0, 0, 0.9);
+            overflow-x: hidden;
+            transition: 0.5s;
+        }
+
+        .overlay-content {
+            position: relative;
+            top: 10%;
+            width: 100%;
+            margin-top: 0;
+            text-align: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .overlay-content a {
+            display: block;
+            padding: 8px 16px;
+            text-decoration: none;
+            font-size: 36px;
+            color: #818181;
+            margin: 5px 0;
+            transition: 0.3s;
+            white-space: normal;
+            word-wrap: break-word;
+        }
+
+        .overlay a:hover,
+        .overlay a:focus {
+            color: #f1f1f1;
+        }
+
+        .overlay .closebtn {
+            position: absolute;
+            top: 20px;
+            right: 45px;
+            font-size: 60px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        @media screen and (max-height: 450px) {
+            .overlay a {
+                font-size: 20px
+            }
+
+            .overlay .closebtn {
+                font-size: 40px;
+                top: 15px;
+                right: 35px;
+            }
+        }
+
+        .menu-icon {
+            font-size: 30px;
+            cursor: pointer;
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 2;
+        }
+
+        @media screen and (max-width: 600px) {
+            .menu-icon {
+                top: 15px;
+                right: 15px;
+            }
+
+            h1 {
+                padding-top: 60px;
+            }
+        }
     </style>
 </head>
 
@@ -1359,15 +1841,20 @@ static const char ApiKey_Page[] PROGMEM = R"rawliteral(
                 </button>
             </div>
         </form>
-        <form action="/" method="GET">
-            <div class="buttons">
-                <button type="submit">
-                    <i class="fas fa-home"></i> %GOHOMETEXT%
-                </button>
-            </div>
-        </form>
     </main>
-
+    <div id="myNav" class="overlay">
+        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
+        <div class="overlay-content">
+            <a href="/"><i class="fas fa-home"></i> %HOMETEXT%</a>
+            <a href="/device"><i class="fas fa-cogs"></i> %DEVICESETTINGS%</a>
+            <a href="/display"><i class="fas fa-desktop"></i> %DISPLAYSETTINGS%</a>
+            <a href="/security"><i class="fas fa-lock"></i> %SECURITYSETTINGS%</a>
+            <a href="/currency"><i class="fas fa-money-bill"></i> %CURRENCYSETTINGS%</a>
+            <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
+            <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
+        </div>
+    </div>
+    <span id="menuIcon" class="menu-icon" onclick="openNav()">&#9776;</span>
     <script>
         function toggleApiKey() {
             const input = document.getElementById("OWMApiKey");
@@ -1407,6 +1894,34 @@ static const char ApiKey_Page[] PROGMEM = R"rawliteral(
             submitBtn.disabled = true;
             showToast("%FORMSENDING%");
         });
+
+        function openNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            overlay.style.width = "100%";
+            document.getElementById("menuIcon").style.display = "none";
+
+            setTimeout(() => {
+                content.style.opacity = "1";
+                closeBtn.style.opacity = "1";
+            }, 0);
+        }
+
+        function closeNav() {
+            const overlay = document.getElementById("myNav");
+            const content = document.querySelector(".overlay-content");
+            const closeBtn = document.querySelector(".closebtn");
+
+            content.style.opacity = "0";
+            closeBtn.style.opacity = "0";
+
+            setTimeout(() => {
+                overlay.style.width = "0%";
+                document.getElementById("menuIcon").style.display = "block";
+            }, 0);
+        }
     </script>
 </body>
 

@@ -1,6 +1,6 @@
 #include <Arduino.h>
 
-#define VERSION "1.2"
+#define VERSION "1.3"
 
 String SysUser = "admin";
 String SysPass = "esp8266";
@@ -30,8 +30,8 @@ const int SDA_PIN = D2;
 const int SDC_PIN = D1;
 boolean INVERT_DISPLAY = false; // true = pins at top | false = pins at the bottom
 int Disp_Contrast = 255;        // 0 = zero brightness | 255 = full brightness
-bool IS_24HOUR = true;      // true = use 24 hour | false = use 12 hour
-bool SHOW_MNAME = true;      // true = show month name | false = show month number
+bool IS_24HOUR = true;      	// true = use 24 hour | false = use 12 hour
+bool SHOW_MNAME = true;      	// true = show month name | false = show month number
 
 // OpenWeatherMap Settings
 String OPEN_WEATHER_MAP_APP_ID = ""; // Sign up here to get an API key: https://openweathermap.org

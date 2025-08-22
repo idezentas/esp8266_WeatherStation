@@ -30,7 +30,7 @@ typedef struct OpenMeteoApiCurrentData
   // "uv_index": 4.25
   float uv_index;
   // "time": "1753625700",
-  uint32_t observationTime;
+  uint32_t time;
 } OpenMeteoApiCurrentData;
 
 class OpenMeteoApiCurrent : public JsonListener

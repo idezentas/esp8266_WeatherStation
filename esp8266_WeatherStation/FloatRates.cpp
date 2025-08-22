@@ -94,6 +94,7 @@ void FloatRates::whitespace(char c) {
 
 void FloatRates::startDocument() {
   Serial.println(F("start document"));
+  Serial.println();
 }
 
 void FloatRates::key(String key) {

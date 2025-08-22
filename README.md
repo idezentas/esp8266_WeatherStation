@@ -7,16 +7,16 @@ This project is based on the [ThingPulse - WeatherStationDemo](https://github.co
 - Synchronous Web Server with a user-friendly web interface
 - Settings Pages: Device, Security, API Keys, Display, Currency Rates, and Restore to Default Settings
 - OTA Updates: Remote firmware updates with ElegantOTA v3
-- WiFiManager: No hardcoded Wi-Fi credentials required
-- Live Weather & Air Quality (AQI): From OpenWeatherMap
+- WiFiManager: No hardcoded Wi-Fi credentials required.
+- Live Weather, Air Quality (AQI), Forecasts: From OpenWeatherMap API
 - UV Index: Real-time UV data from Open-Meteo API
 - Currency Rates: From Floatrates API
 - Time & Date Display: Synced using NTP servers. Automatic daylight saving time compatibility is available.
-- Night Mode: OLED screen turns off/on automatically based on configured time
-- Display Rotation: Flip the OLED screen vertically
-- Theme Support: Light and dark theme options in the web interface (The theme selection will automatically be the same as the theme used in the system.)
+- Night Mode: OLED screen turns off/on automatically based on configured time.
+- Display Rotation: Flip the OLED screen vertically.
 - Mobile-Friendly Interface: Fully responsive design
 - Multi-language Support: Currently supports **Turkish** and **English**
+- Indoor: Temperature and humidity data were obtained using a DHT22 sensor.
 
 ## Web Interface Screenshots
 
@@ -44,6 +44,38 @@ Currency Settings
 
 <img src="images/currency-en.png" alt="Currency Settings" width="300"/>
 
+Menu Example
+
+<img src="images/menu_example-en.png" alt="Menu Example" width="500"/>
+
+## Hardware Requirements
+
+- ESP8266 (NodeMCU, Wemos D1 Mini or similar)  
+- 0.96" I2C OLED Display (SSD1306)  
+- Wi-Fi connectivity  
+- 5V USB power supply
+
+### NodeMCU (ESP8266) Wiring Table
+
+| OLED Pin Name | NodeMCU (ESP8266) Pin |
+| ------------- | --------------------- |
+| GND           | GND                   |
+| VCC           | 3V3                   |
+| SCL           | D1 (GPIO5)            |
+| SDA           | D2 (GPIO4)            |
+
+| DHT22 Pin Name | NodeMCU (ESP8266) Pin |
+| -------------- | --------------------- |
+| GND            | GND                   |
+| VCC            | 3V3                   |
+| DATA           | D5 (GPIO14)           |
+
+One lead of the 10K ohm resistor will be connected to the DATA pin, and the other lead will be connected to VCC.
+
+<img src="https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/05/oled-temperature-humidity-esp8266.png?quality=100&strip=all&ssl=1" alt="Wiring Diagram" width="400"/>
+
+Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/esp32-esp8266-dht-temperature-and-humidity-oled-display/)
+
 ## Setup Instructions
 
 - Create a free account on [OpenWeatherMap](https://openweathermap.org) and [OpenCage](https://opencagedata.com) and obtain API keys.
@@ -56,6 +88,8 @@ Currency Settings
   - [WiFiManager](https://github.com/tzapu/WiFiManager)
   - [Json Streaming Parser](https://github.com/squix78/json-streaming-parser)
   - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+  - [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor)
+  - [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
 
 - Then open the `esp8266_WeatherStation.ino` file:
   - If you want to use Turkish, change `#include "lang_tr.h"`, if you want to use English, change `#include "lang_en.h"`. This selection specifies the language of the text on the OLED and web page.
@@ -64,14 +98,14 @@ Currency Settings
 
 - If your WiFi network is already configured, it will connect automatically. You do not need to configure the WiFiManager settings.
 
-- When the device is turned on, if WiFiManager is active, connect to the WiFi network displayed on the OLED screen to open the settings portal.
+- When the device is turned on, if WiFiManager is active, connect to the WiFi network displayed on the OLED display to open the settings portal.
   - Click the **Configure WiFi** button.
   - Select the WiFi network from the list above.
   - Enter your WiFi network password.
   - Click the **Save** button.
   - The system will then automatically connect to the WiFi network you selected.
 
-- After connecting to the WiFi network, the device's IP address will be displayed on the OLED screen. Go to that IP address via your browser. If you can't see it, don't worry. The page displaying the IP address is among the pages that will appear during normal use. You can also find the IP address there.
+- After connecting to the WiFi network, the device's IP address will be displayed on the OLED display. Go to that IP address via your browser. If you can't see it, don't worry. The page displaying the IP address is among the pages that will appear during normal use. You can also find the IP address there.
 
 - After going to the IP address, you will be greeted by the main page of the web interface.
 
@@ -83,55 +117,38 @@ Currency Settings
 
 - Then, go to the **Device Settings** page via the web interface:
   - Enter the city, country names then click the **Find Location/Time from City** button. It will automatically configure the other necessary settings for you.
-  - Enter the update frequency in minutes.
-  - Click the **Save** button. After clicking, you will be automatically redirected to the main page. At the same time, the data will be updated with new values on the OLED screen.
+  - If you know the latitude and longitude values, you can replace them with your own values. (You can find the latitude and longitude values on Google Maps.)
+  - To check the latitude and longitude values entered, click the **Show on Map** button. (The location corresponding to the values entered will be displayed on Google Maps in the side tab.)
+  - Select the update interval in minutes.
+  - Click the **Save** button. After clicking, you will be automatically redirected to the main page. At the same time, the data will be updated with new values on the OLED display.
 
 - Then, go to the **Display Settings** page via the web interface:
   - Select the display orientation, time format, and month display format in that order.
   - Enter the turn on and turn off times for night mode scheduling.  
-  - Click the **Save** button. After clicking, you will be automatically redirected to the home page. At the same time, the data will be updated with the new values on the OLED screen.
+  - Click the **Save** button. After clicking, you will be automatically redirected to the home page. At the same time, the data will be updated with the new values on the OLED display.
 
 - Then, go to the **Currency Rate Settings** page via the web interface:
-  - Select the base currency and target currency for 2 currency exchange rates.
-  - Click the **Save** button. After clicking, you will be automatically redirected to the main page. At the same time, the data will be updated with the new values on the OLED screen.
+  - Select the base currency and target currency for 2 currency rates.
+  - Click the **Save** button. After clicking, you will be automatically redirected to the main page. At the same time, the data will be updated with the new values on the OLED display.
 
-- After checking the values you have selected on the OLED screen, you can start using it with peace of mind.
+- After checking the values you have selected on the OLED display, you can start using it with peace of mind.
 
 - To change the settings you have selected at a later time, you can go to the relevant page on the web interface and make the necessary changes.
-
-## Hardware Requirements
-
-- ESP8266 (NodeMCU, Wemos D1 Mini or similar)  
-- 0.96" I2C OLED Display (SSD1306)  
-- Wi-Fi connectivity  
-- 5V USB power supply
-
-### OLED - NodeMCU (ESP8266) Wiring Table
-
-| OLED Pin Name | NodeMCU (ESP8266) Pin |
-|---------------|------------------------|
-| GND           | GND                    |
-| VCC           | 3V3                    |
-| SCL           | D1 (GPIO5)             |
-| SDA           | D2 (GPIO4)             |
-
-<img src="https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/05/ESP8266_oled_display_wiring.png?quality=100&strip=all&ssl=1" alt="Wiring Diagram" width="500"/>
-
-Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/esp8266-0-96-inch-oled-display-with-arduino-ide/)
 
 ## Credits
 
 - Demo Base: [ThingPulse / WeatherStationDemo](https://github.com/ThingPulse/esp8266-weather-station/tree/master/examples/WeatherStationDemo)  
 - OLED Display Library: [ESP8266 and ESP32 OLED driver for SSD1306 displays](https://github.com/ThingPulse/esp8266-oled-ssd1306)  
-- OTA: [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA)  
+- OTA Library: [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA)  
 - Weather Data: [OpenWeatherMap](https://openweathermap.org)  
 - UV Index: [Open-Meteo](https://open-meteo.com)  
 - Time Sync: [NTP Servers](https://pool.ntp.org)  
 - WiFi Config Portal: [WiFiManager](https://github.com/tzapu/WiFiManager)  
 - Currency Data: [Floatrates](https://www.floatrates.com)  
 - Night Mode and Display Rotation Feature: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
-- JSON: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) and [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
-- Timezones [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)
+- JSON Libraries: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) and [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+- Timezones: [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)
+- Required Libraries for DHT22: [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) and [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
 
 # ESP8266 Hava Durumu İstasyonu
 
@@ -143,15 +160,15 @@ Bu proje, [ThingPulse - WeatherStationDemo](https://github.com/ThingPulse/esp826
 - Ayarlar Sayfaları: Cihaz, Güvenlik, API Anahtarları, Ekran, Döviz Kurları ve Varsayılan ayarlara sıfırlama
 - OTA Güncelleme: ElegantOTA ile uzaktan yazılım güncellemeleri
 - WiFiManager: Gömülü Wi-Fi adı/şifresi gerekmeden yapılandırma
-- Anlık Hava Durumu & Hava Kalitesi (AQI): OpenWeatherMap üzerinden alınmaktadır.
+- Anlık Hava Durumu, Hava Kalitesi (AQI), Hava Tahminleri: OpenWeatherMap üzerinden alınmaktadır.
 - UV İndeksi: Open-Meteo API'den gerçek zamanlı UV bilgisi
 - Döviz Kurları: Floatrates API üzerinden alınmaktadır.
 - Saat & Tarih Gösterimi: NTP sunucusu üzerinden alınmaktadır. Otomatik yaz saati uyumluluğu bulunmaktadır.
 - Gece Modu : Belirtilen saatlerde OLED ekran otomatik açılır/kapanır.
 - Ekran Döndürme: OLED ekranı dikey olarak döndürme
-- Tema Desteği: Web arayüzünde açık ve koyu tema seçeneği (Tema seçimi otomatik olarak sistemde kullanan tema aynı olacaktır.)
 - Mobil Uyumlu Arayüz: Tüm cihazlarda uyumlu tasarım
 - Çoklu Dil Desteği: Şu anda **Türkçe** ve **İngilizce** arayüz seçeneği
+- İç Mekan: DHT22 sensörü ile sıcaklık ve nem bilgileri elde edildi.
 
 ## Web Arayüzü Ekran görüntüleri
 
@@ -179,6 +196,38 @@ Döviz Kuru Ayarları
 
 <img src="images/currency-tr.png" alt="Döviz Kuru Ayarları" width="300"/>
 
+Menü Örneği
+
+<img src="images/menu_example-tr.png" alt="Menü Örneği" width="500"/>
+
+## Donanım Gereksinimleri
+
+- ESP8266 (NodeMCU, Wemos D1 Mini veya benzeri)  
+- 0.96" I2C OLED ekran (SSD1306)
+- Wi-Fi bağlantısı  
+- 5V USB güç kaynağı
+
+### NodeMCU (ESP8266) Bağlantı Tablosu
+
+| OLED Pin Adı | NodeMCU (ESP8266) Pin |
+| ------------ | --------------------- |
+| GND          | GND                   |
+| VCC          | 3V3                   |
+| SCL          | D1 (GPIO5)            |
+| SDA          | D2 (GPIO4)            |
+
+| DHT22 Pin Adı | NodeMCU (ESP8266) Pin |
+| ------------- | --------------------- |
+| GND           | GND                   |
+| VCC           | 3V3                   |
+| DATA          | D5 (GPIO14)           |
+
+10K ohm direncin bir ucu DATA pinine, diğer ucu ise VCC'ye bağlanacaktır.
+
+<img src="https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/05/oled-temperature-humidity-esp8266.png?quality=100&strip=all&ssl=1" alt="Bağlantı Şeması" width="400"/>
+
+Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutorials.com/esp32-esp8266-dht-temperature-and-humidity-oled-display/)
+
 ## Kurulum aşamaları
 
 - [OpenWeatherMap](https://openweathermap.org) ve [OpenCage](https://opencagedata.com) sitelerinden ücretsiz üyelik oluşturup API anahtarlarını alınız.
@@ -191,6 +240,8 @@ Döviz Kuru Ayarları
   - [WiFiManager](https://github.com/tzapu/WiFiManager)
   - [Json Streaming Parser](https://github.com/squix78/json-streaming-parser)
   - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+  - [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor)
+  - [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
 
 - Daha sonra `esp8266_WeatherStation.ino` dosyasını açarak:
   - Eğer kullanmak istediğiniz dil Türkçe ise `#include "lang_tr.h"`, Eğer kullanmak istediğiniz dil İngilizce ise `#include "lang_en.h"` olarak değiştiriniz. Bu seçiminiz OLED ve web sayfası üzerinde bulunan yazılarının dili belirtmektedir.
@@ -218,6 +269,8 @@ Döviz Kuru Ayarları
 
 - Daha sonra web arayüzü üzerinden önce **Cihaz Ayarları** sayfasına giderek:
   - Şehir ve Ülke adlarını girip **Şehirden Konum/Zaman Bul** butonuna tıklayınız. Size otomatik olarak diğer gerekli ayarları yapacaktır.
+  - Eğer enlem ve boylam değerleri biliyorsanız enlem ve boylam değerlerini kendi değerleriniz ile değiştirebilirsiniz. (Enlem ve boylam değerlerini Google Haritalar üzerinden öğrenebilirsiniz.)
+  - Girilen enlem ve boylam değerlerini kontrol etmek için **Haritada Göster** butonuna tıklayınız. (Girilen değerlere karşılık gelen konum, yan sekmedeki Google Haritalar'da görüntülenecektir.)
   - Güncelleme sıklığı seçiniz.
   - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir. Aynı zamanda OLED ekranda yeni değerler ile veriler güncellenecektir.
 
@@ -234,36 +287,17 @@ Döviz Kuru Ayarları
 
 - Başka bir zaman seçtiğiniz ayarı değiştirmek için web arayüzünde ilgili sayfaya giderek gerekli değişiklikleri yapabilirsiniz.
 
-## Donanım Gereksinimleri
-
-- ESP8266 (NodeMCU, Wemos D1 Mini veya benzeri)  
-- 0.96" I2C OLED ekran (SSD1306)
-- Wi-Fi bağlantısı  
-- 5V USB güç kaynağı
-
-### OLED - NodeMCU (ESP8266) Bağlantı Tablosu
-
-| OLED Pin Adı | NodeMCU (ESP8266) Pin |
-|--------------|-----------------------|
-| GND          | GND                   |
-| VCC          | 3V3                   |
-| SCL          | D1 (GPIO5)            |
-| SDA          | D2 (GPIO4)            |
-
-<img src="https://i0.wp.com/randomnerdtutorials.com/wp-content/uploads/2019/05/ESP8266_oled_display_wiring.png?quality=100&strip=all&ssl=1" alt="Bağlantı Şeması" width="500"/>
-
-Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutorials.com/esp8266-0-96-inch-oled-display-with-arduino-ide/)
-
 ## Teşekkürler
 
 - Demo Tabanı: [ThingPulse / WeatherStationDemo](https://github.com/ThingPulse/esp8266-weather-station/tree/master/examples/WeatherStationDemo)  
 - OLED Ekran Kütüphanesi: [ESP8266 and ESP32 OLED driver for SSD1306 displays](https://github.com/ThingPulse/esp8266-oled-ssd1306)  
-- OTA: [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA)  
+- OTA Kütüphanesi: [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA)  
 - Hava Verisi: [OpenWeatherMap](https://openweathermap.org)  
 - UV Verisi: [Open-Meteo](https://open-meteo.com)  
 - Saat: [NTP Sunucuları](https://pool.ntp.org)  
 - WiFi Kurulumu: [WiFiManager](https://github.com/tzapu/WiFiManager)  
 - Döviz Verisi: [Floatrates](https://www.floatrates.com)  
 - Gece Modu ve Ekran Döndürme Özelliği: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
-- JSON: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) ve [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
-- Zaman Dilimleri [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)
+- JSON Kütüphaneleri: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) ve [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+- Zaman Dilimleri: [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)
+- DHT22 için Gerekli Kütüphaneler: [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) ve [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)

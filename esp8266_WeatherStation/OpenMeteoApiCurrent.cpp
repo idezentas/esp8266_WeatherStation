@@ -40,7 +40,7 @@ void OpenMeteoApiCurrent::updateWeather(OpenMeteoApiCurrentData *data, float lat
 
 String OpenMeteoApiCurrent::buildPath(String locationParameter)
 {
-    return "/v1/forecast?" + locationParameter + "&timezone=auto&timeformat=unixtime&current=uv_index";
+  return "/v1/forecast?" + locationParameter + "&timezone=auto&timeformat=unixtime&current=uv_index";
 }
 
 void OpenMeteoApiCurrent::doUpdate(OpenMeteoApiCurrentData *data, String path)
@@ -50,7 +50,7 @@ void OpenMeteoApiCurrent::doUpdate(OpenMeteoApiCurrentData *data, String path)
   this->data = data;
   JsonStreamingParser parser;
   parser.setListener(this);
- Serial.printf_P(PSTR("[HTTP] Requesting resource at http://%s:%u%s\n"), host.c_str(), port, path.c_str());
+  Serial.printf_P(PSTR("[HTTP] Requesting resource at http://%s:%u%s\n"), host.c_str(), port, path.c_str());
 
   WiFiClient client;
 #if defined(ESP8266)
@@ -107,6 +107,7 @@ void OpenMeteoApiCurrent::whitespace(char c)
 void OpenMeteoApiCurrent::startDocument()
 {
   Serial.println(F("start document"));
+  Serial.println();
 }
 
 void OpenMeteoApiCurrent::key(String key)
@@ -116,11 +117,11 @@ void OpenMeteoApiCurrent::key(String key)
 
 void OpenMeteoApiCurrent::value(String value)
 {
-  // "time": "1753625700", uint32_t observationTime;
+  // "time": "1753625700", uint32_t time;
   if (currentKey == "time" && currentParent == "current")
   {
-    this->data->observationTime = value.toInt();
-    Serial.printf_P(PSTR("observationTime: %ld\n"), value.toInt());
+    this->data->time = value.toInt();
+    Serial.printf_P(PSTR("time: %ld\n"), value.toInt());
   }
   // "uv_index": 4.2, float uv_index;
   if (currentKey == "uv_index" && currentParent == "current")
