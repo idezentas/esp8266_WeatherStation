@@ -12,8 +12,8 @@ This project is based on the [ThingPulse - WeatherStationDemo](https://github.co
 - UV Index: Real-time UV data from Open-Meteo API
 - Currency Rates: From Floatrates API
 - Time & Date Display: Synced using NTP servers. Automatic daylight saving time compatibility is available.
-- Night Mode: OLED screen turns off/on automatically based on configured time.
-- Display Rotation: Flip the OLED screen vertically.
+- Night Mode: OLED display turns off/on automatically based on configured time.
+- Display Rotation: Flip the OLED display vertically.
 - Mobile-Friendly Interface: Fully responsive design
 - Multi-language Support: Currently supports **Turkish** and **English**
 - Indoor: Temperature and humidity data were obtained using a DHT22 sensor.
@@ -51,8 +51,9 @@ Menu Example
 ## Hardware Requirements
 
 - ESP8266 (NodeMCU, Wemos D1 Mini or similar)  
-- 0.96" I2C OLED Display (SSD1306)  
-- Wi-Fi connectivity  
+- 0.96" I2C OLED Display (SSD1306) 
+- DHT22 
+- Wi-Fi connection  
 - 5V USB power supply
 
 ### NodeMCU (ESP8266) Wiring Table
@@ -118,7 +119,7 @@ Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/e
 - Then, go to the **Device Settings** page via the web interface:
   - Enter the city, country names then click the **Find Location/Time from City** button. It will automatically configure the other necessary settings for you.
   - If you know the latitude and longitude values, you can replace them with your own values. (You can find the latitude and longitude values on Google Maps.)
-  - To check the latitude and longitude values entered, click the **Show on Map** button. (The location corresponding to the values entered will be displayed on Google Maps in the side tab.)
+  - To check the latitude and longitude values entered, click the **Show on Map** button. (The location corresponding to the values entered will be displayed on Google Maps in the new tab.)
   - Select the update interval in minutes.
   - Click the **Save** button. After clicking, you will be automatically redirected to the main page. At the same time, the data will be updated with new values on the OLED display.
 
@@ -148,7 +149,7 @@ Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/e
 - Night Mode and Display Rotation Feature: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
 - JSON Libraries: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) and [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
 - Timezones: [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)
-- Required Libraries for DHT22: [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) and [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
+- DHT22 Libraries: [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) and [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
 
 # ESP8266 Hava Durumu İstasyonu
 
@@ -204,6 +205,7 @@ Menü Örneği
 
 - ESP8266 (NodeMCU, Wemos D1 Mini veya benzeri)  
 - 0.96" I2C OLED ekran (SSD1306)
+- DHT22
 - Wi-Fi bağlantısı  
 - 5V USB güç kaynağı
 
@@ -270,7 +272,7 @@ Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutoria
 - Daha sonra web arayüzü üzerinden önce **Cihaz Ayarları** sayfasına giderek:
   - Şehir ve Ülke adlarını girip **Şehirden Konum/Zaman Bul** butonuna tıklayınız. Size otomatik olarak diğer gerekli ayarları yapacaktır.
   - Eğer enlem ve boylam değerleri biliyorsanız enlem ve boylam değerlerini kendi değerleriniz ile değiştirebilirsiniz. (Enlem ve boylam değerlerini Google Haritalar üzerinden öğrenebilirsiniz.)
-  - Girilen enlem ve boylam değerlerini kontrol etmek için **Haritada Göster** butonuna tıklayınız. (Girilen değerlere karşılık gelen konum, yan sekmedeki Google Haritalar'da görüntülenecektir.)
+  - Girilen enlem ve boylam değerlerini kontrol etmek için **Haritada Göster** butonuna tıklayınız. (Girilen değerlere karşılık gelen konum, yeni sekmedeki Google Haritalar'da görüntülenecektir.)
   - Güncelleme sıklığı seçiniz.
   - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir. Aynı zamanda OLED ekranda yeni değerler ile veriler güncellenecektir.
 
@@ -300,4 +302,4 @@ Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutoria
 - Gece Modu ve Ekran Döndürme Özelliği: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
 - JSON Kütüphaneleri: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) ve [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
 - Zaman Dilimleri: [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)
-- DHT22 için Gerekli Kütüphaneler: [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) ve [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
+- DHT22 Kütüphaneleri: [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) ve [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
