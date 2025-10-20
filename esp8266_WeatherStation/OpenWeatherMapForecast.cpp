@@ -42,7 +42,7 @@ uint8_t OpenWeatherMapForecast::updateForecasts(OpenWeatherMapForecastData *data
 uint8_t OpenWeatherMapForecast::updateForecasts(OpenWeatherMapForecastData *data, String appId, float lat, float lon, uint8_t maxForecasts)
 {
   this->maxForecasts = maxForecasts;
-  return doUpdate(data, buildPath(appId, "lat=" + String(lat) + "&lon=" + String(lon)));
+  return doUpdate(data, buildPath(appId, "lat=" + String(lat, 7) + "&lon=" + String(lon, 7)));
 }
 
 uint8_t OpenWeatherMapForecast::updateForecastsById(OpenWeatherMapForecastData *data, String appId, String locationId, uint8_t maxForecasts)

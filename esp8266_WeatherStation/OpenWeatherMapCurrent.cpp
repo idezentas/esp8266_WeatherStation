@@ -39,7 +39,7 @@ void OpenWeatherMapCurrent::updateCurrent(OpenWeatherMapCurrentData *data, Strin
 }
 void OpenWeatherMapCurrent::updateCurrent(OpenWeatherMapCurrentData *data, String appId, float lat, float lon)
 {
-  doUpdate(data, buildPath(appId, "lat=" + String(lat) + "&lon=" + String(lon)));
+  doUpdate(data, buildPath(appId, "lat=" + String(lat, 7) + "&lon=" + String(lon, 7)));
 }
 
 void OpenWeatherMapCurrent::updateCurrentById(OpenWeatherMapCurrentData *data, String appId, String locationId)

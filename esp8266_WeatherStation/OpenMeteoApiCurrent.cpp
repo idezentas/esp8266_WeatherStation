@@ -35,7 +35,7 @@ OpenMeteoApiCurrent::OpenMeteoApiCurrent()
 
 void OpenMeteoApiCurrent::updateWeather(OpenMeteoApiCurrentData *data, float lat, float lon)
 {
-  doUpdate(data, buildPath(("latitude=" + String(lat) + "&longitude=" + String(lon))));
+  doUpdate(data, buildPath(("latitude=" + String(lat, 7) + "&longitude=" + String(lon, 7))));
 }
 
 String OpenMeteoApiCurrent::buildPath(String locationParameter)

@@ -34,7 +34,7 @@ OpenWeatherMapAir::OpenWeatherMapAir()
 }
 void OpenWeatherMapAir::updateCurrent(OpenWeatherMapAirData *data, String appId, float lat, float lon)
 {
-  doUpdate(data, buildPath(appId, "lat=" + String(lat) + "&lon=" + String(lon)));
+  doUpdate(data, buildPath(appId, "lat=" + String(lat, 7) + "&lon=" + String(lon, 7)));
 }
 
 String OpenWeatherMapAir::buildPath(String appId, String locationParameter)

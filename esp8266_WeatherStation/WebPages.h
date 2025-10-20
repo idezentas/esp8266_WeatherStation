@@ -9,13 +9,13 @@ static const char Home_Page[] PROGMEM = R"rawliteral(
   <title>%HOMETITLE%</title>
   <style>
     :root {
-        --bg-color: #121212;
-        --text-color: #eeeeee;
-        --input-bg: #2a2a2a;
-        --button-bg: #388e3c;
-        --button-text: #ffffff;
-        --accent-color: #66bb6a;
-        --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
+      --bg-color: #121212;
+      --text-color: #eeeeee;
+      --input-bg: #2a2a2a;
+      --button-bg: #388e3c;
+      --button-text: #ffffff;
+      --accent-color: #66bb6a;
+      --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
     }
 
     body {
@@ -116,10 +116,6 @@ static const char Home_Page[] PROGMEM = R"rawliteral(
         <button type="submit">
           <i class="fas fa-lock"></i> %SECURITYSETTINGS% </button>
       </form>
-      <form action="/currency" method="GET">
-        <button type="submit">
-          <i class="fas fa-money-bill"></i> %CURRENCYSETTINGS% </button>
-      </form>
       <form action="/updatedata" method="GET">
         <button type="submit">
           <i class="fas fa-cloud-download-alt"></i> %UPDATEDATATEXT% </button>
@@ -158,6 +154,7 @@ static const char Home_Page[] PROGMEM = R"rawliteral(
       statusMessage.textContent = "%DEFAULTSETTINGS%";
       statusMessage.style.display = "block";
     });
+
   </script>
 </body>
 
@@ -192,7 +189,6 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
         }
 
         body {
-            margin: 0;
             font-family: Arial, sans-serif;
             background: var(--bg-color);
             color: var(--text-color);
@@ -269,15 +265,6 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
 
         .buttons {
             margin-top: 1rem;
-        }
-
-        .centered-text {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 0.8rem;
-            font-size: 1.3rem;
-            color: var(--accent-color);
-            margin-top: 2rem;
         }
 
         #toast {
@@ -393,69 +380,65 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
         <h1>%DEVICESETTINGS%</h1>
         <form action="/savedevice" method="GET" id="deviceForm">
             <div class="setting">
-                <div class="setting">
-                    <label for="city">%CITYTEXT%</label>
-                    <input type="text" id="city" name="city" required placeholder="%CITYPLACE%" value="%CITY%"
-                        autocomplete="address-level2" autocorrect="on" spellcheck="true">
-                </div>
-                <div class="setting">
-                    <label for="country">%COUNTRYTEXT%</label>
-                    <input type="text" id="country" name="country" required placeholder="%COUNTRYPLACE%"
-                        value="%COUNTRY%" autocomplete="country" autocorrect="on" spellcheck="true">
-                    <button type="button" onclick="geocodeFromCity()">
-                        <i class="fas fa-search"></i> %FINDGEOTIME%
-                    </button>
-                </div>
-                <div class="setting">
-                    <label for="latitude">%LATTEXT%</label>
-                    <input type="number" id="latitude" name="latitude" required placeholder="%LATPLACE%" value="%LAT%"
-                        inputmode="decimal">
-                </div>
-                <div class="setting">
-                    <label for="longitude">%LONTEXT%</label>
-                    <input type="number" id="longitude" name="longitude" required placeholder="%LONPLACE%" value="%LON%"
-                        inputmode="decimal">
-                </div>
-                <div class="setting">
-                    <button type="button" onclick="openMap()">
-                        <i class='fas fa-map-marker' style='color:red'></i> %SHOWMAPTEXT%
-                    </button>
-                </div>
-                <div class="setting">
-                    <label for="timezoneName">%TZNAMETEXT%</label>
-                    <select id="timezoneName" name="timezoneName">
-                        <option>...</option>
-                    </select>
-                </div>
-                <div class="setting">
-                    <input type="hidden" id="posixInput" name="posixInput" readonly />
-                </div>
-                <div class="setting">
-                    <label for="units">%UNITTEXT%</label>
-                    <select id="units" name="units">
-                        <option value="metric" %METRIC%>%METRICTEXT%</option>
-                        <option value="imperial" %IMPERIAL%>%IMPERIALTEXT%</option>
-                    </select>
-                </div>
-                <div class="setting">
-                    <label for="updateInterval">%INTERVALTEXT%</label>
-                    <select id="updateInterval" name="updateInterval">
-                        <option value="up10" %UP10%>10</option>
-                        <option value="up15" %UP15%>15</option>
-                        <option value="up20" %UP20%>20</option>
-                        <option value="up25" %UP25%>25</option>
-                        <option value="up30" %UP30%>30</option>
-                        <option value="up45" %UP45%>45</option>
-                        <option value="up60" %UP60%>60</option>
-                    </select>
-                </div>
-                <div class="buttons">
-                    <button type="submit" id="submitBtn">
-                        <i class="fas fa-floppy-disk"></i> %SAVETEXT%
-                    </button>
-                </div>
+                <label for="city">%CITYTEXT%</label>
+                <input type="text" id="city" name="city" required placeholder="%CITYPLACE%" value="%CITY%"
+                    autocomplete="address-level2" autocorrect="on" spellcheck="true">
+            </div>
+            <div class="setting">
+                <label for="country">%COUNTRYTEXT%</label>
+                <input type="text" id="country" name="country" required placeholder="%COUNTRYPLACE%" value="%COUNTRY%"
+                    autocomplete="country" autocorrect="on" spellcheck="true">
+                <button type="button" onclick="geocodeFromCity()">
+                    <i class="fas fa-search"></i> %FINDGEOTIME%
+                </button>
+            </div>
+            <div class="setting">
+                <label for="latitude">%LATTEXT%</label>
+                <input type="text" id="latitude" name="latitude" required placeholder="%LATPLACE%" value="%LAT%"
+                    inputmode="decimal">
+            </div>
+            <div class="setting">
+                <label for="longitude">%LONTEXT%</label>
+                <input type="text" id="longitude" name="longitude" required placeholder="%LONPLACE%" value="%LON%"
+                    inputmode="decimal">
+            </div>
+            <div class="setting">
+                <button type="button" onclick="openMap()">
+                    <i class='fas fa-map-marker' style='color:red'></i> %SHOWMAPTEXT%
+                </button>
+            </div>
+            <div class="setting">
+                <label for="timezoneName">%TZNAMETEXT%</label>
+                <input type="text" id="timezoneName" name="timezoneName" placeholder="%TZNAMEPLACE%" value="%TZNAME%" readonly />
+            </div>
+            <div class="setting">
+                <input type="hidden" id="posixInput" name="posixInput" readonly />
+            </div>
+            <div class="setting">
+                <label for="units">%UNITTEXT%</label>
+                <select id="units" name="units">
+                    <option value="metric" %METRIC%>%METRICTEXT%</option>
+                    <option value="imperial" %IMPERIAL%>%IMPERIALTEXT%</option>
+                </select>
+            </div>
+            <div class="setting">
+                <label for="updateInterval">%INTERVALTEXT%</label>
+                <select id="updateInterval" name="updateInterval">
+                    <option value="up10" %UP10%>10</option>
+                    <option value="up15" %UP15%>15</option>
+                    <option value="up20" %UP20%>20</option>
+                    <option value="up30" %UP30%>30</option>
+                    <option value="up60" %UP60%>60</option>
+                </select>
+            </div>
+            <div class="buttons">
+                <button type="submit" id="submitBtn">
+                    <i class="fas fa-floppy-disk"></i> %SAVETEXT%
+                </button>
+            </div>
         </form>
     </main>
+
     <div id="myNav" class="overlay">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
         <div class="overlay-content">
@@ -463,66 +446,36 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
             <a href="/apikey"><i class="fas fa-key"></i> %APIKEYSETTINGS%</a>
             <a href="/display"><i class="fas fa-desktop"></i> %DISPLAYSETTINGS%</a>
             <a href="/security"><i class="fas fa-lock"></i> %SECURITYSETTINGS%</a>
-            <a href="/currency"><i class="fas fa-money-bill"></i> %CURRENCYSETTINGS%</a>
             <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
             <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
         </div>
     </div>
     <span id="menuIcon" class="menu-icon" onclick="openNav()">&#9776;</span>
+
     <script>
         const ZONES_URL = 'https://raw.githubusercontent.com/idezentas/esp8266_WeatherStation/refs/heads/main/zones.json';
-        const selectTz = document.getElementById('timezoneName');
-        const posixInput = document.getElementById('posixInput');
-        let DEFAULT_ZONE = "%TZNAME%";
         let zonesObj = null;
 
-        function geocodeFromCity() {
-            const city = document.getElementById('city').value.trim();
-            const country = document.getElementById('country').value.trim().toUpperCase();
-            let geoApiKey = "%GEOAPIKEY%";
+        fetch(ZONES_URL)
+            .then(resp => {
+                if (!resp.ok) throw new Error('Timezone data could not be obtained: ' + resp.status);
+                return resp.json();
+            })
+            .then(data => {
+                zonesObj = data;
+                updatePosix();
+            })
+            .catch(err => console.error(err));
 
-            let lang = "%LANG%".toLowerCase();
-            if (lang != "tr" && lang != "en") {
-                lang = "en";
+        document.getElementById('timezoneName').addEventListener('input', updatePosix);
+
+        function updatePosix() {
+            const tzName = document.getElementById('timezoneName').value.trim();
+            if (zonesObj && tzName in zonesObj) {
+                document.getElementById('posixInput').value = zonesObj[tzName];
+            } else {
+                document.getElementById('posixInput').value = '';
             }
-
-            if (!city || !country || !geoApiKey) {
-                showToast("%GEOALERT%");
-                return;
-            }
-            const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(city)},${encodeURIComponent(country)}&key=${geoApiKey}&language=${lang}&pretty=1&limit=1`;
-            fetch(url).then(response => response.json()).then(data => {
-                if (data.results && data.results.length > 0) {
-                    const geometry = data.results[0].geometry;
-                    const tzname = data.results[0].annotations.timezone.name;
-                    const speed_in = data.results[0].annotations.roadinfo.speed_in;
-                    const lat = geometry.lat;
-                    const lng = geometry.lng;
-
-                    if (tzname) {
-                        for (let i = 0; i < selectTz.options.length; i++) {
-                            if (selectTz.options[i].value === tzname) {
-                                selectTz.selectedIndex = i;
-                                updateInput();
-                            }
-                        }
-                    }
-                    if (lat) {
-                        document.getElementById('latitude').value = lat;
-                    }
-                    if (lng) {
-                        document.getElementById('longitude').value = lng;
-                    }
-                    var selectUnit = document.getElementById("units");
-                    (speed_in.toLowerCase() === "km/h") ? selectUnit.value = "metric" : selectUnit.value = "imperial";
-
-                } else {
-                    showToast("%GEOALERT2%");
-                }
-            }).catch(err => {
-                console.error(err);
-                showToast("%GEOALERT3%");
-            });
         }
 
         const form = document.getElementById('deviceForm');
@@ -542,61 +495,45 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
             showToast("%FORMSENDING%");
         });
 
-        function populateSelect(zones) {
-            zonesObj = zones;
-            selectTz.innerHTML = '';
-            const entries = Object.entries(zones).sort((a, b) => a[0].localeCompare(b[0], undefined, {
-                sensitivity: 'base'
-            }));
-            if (entries.length === 0) {
-                const opt = document.createElement('option');
-                opt.textContent = '%TZALERT1%';
-                opt.disabled = true;
-                selectTz.appendChild(opt);
-                posixInput.value = '';
-                return;
-            }
-            let defaultSelectedIndex = -1;
-            entries.forEach(([iana, posix], i) => {
-                const opt = document.createElement('option');
-                opt.value = iana;
-                opt.textContent = `${iana}`;
-                opt.dataset.posix = posix;
-                if (iana === DEFAULT_ZONE) {
-                    opt.selected = true;
-                    defaultSelectedIndex = i;
-                }
-                selectTz.appendChild(opt);
-            });
-            if (defaultSelectedIndex === -1 && selectTz.options.length > 0) {
-                selectTz.selectedIndex = 0;
-            }
-        }
+        function geocodeFromCity() {
+            const city = document.getElementById('city').value.trim();
+            const country = document.getElementById('country').value.trim();
+            const geoApiKey = "%GEOAPIKEY%";
+            let lang = "%LANG%".toLowerCase();
+            if (lang != "tr" && lang != "en") {lang = "en";}
 
-        function updateInput() {
-            const opt = selectTz.selectedOptions[0];
-            if (!opt) {
-                posixInput.value = '';
+            if (!city || !country || !geoApiKey) {
+                showToast("%GEOALERT%");
                 return;
             }
-            posixInput.value = opt.dataset.posix;
+
+            const url = `https://api.opencagedata.com/geocode/v1/json?q=${encodeURIComponent(city)},${encodeURIComponent(country)}&key=${geoApiKey}&language=${lang}&pretty=1&limit=1`;
+            fetch(url)
+                .then(resp => resp.json())
+                .then(data => {
+                    if (data.results && data.results.length > 0) {
+                        const geometry = data.results[0].geometry;
+                        const tzname = data.results[0].annotations.timezone.name;
+                        const speed_in = data.results[0].annotations.roadinfo.speed_in;
+
+                        if (geometry.lat) { document.getElementById('latitude').value = geometry.lat; }
+                        if (geometry.lng) { document.getElementById('longitude').value = geometry.lng; }
+
+                        if (tzname) {
+                            document.getElementById('timezoneName').value = tzname;
+                            updatePosix();
+                        }
+
+                        document.getElementById("units").value = (speed_in.toLowerCase() === "km/h") ? "metric" : "imperial";
+                    } else {
+                        showToast("%GEOALERT2%");
+                    }
+                })
+                .catch(err => {
+                    console.error(err);
+                    showToast("%GEOALERT3%");
+                });
         }
-        selectTz.addEventListener('change', updateInput);
-        fetch(ZONES_URL).then(resp => {
-            if (!resp.ok) throw new Error('%TZALERT2%' + resp.status);
-            return resp.json();
-        }).then(zones => {
-            populateSelect(zones);
-            updateInput();
-        }).catch(err => {
-            console.error(err);
-            selectTz.innerHTML = '';
-            const opt = document.createElement('option');
-            opt.textContent = '%TZALERT3%';
-            opt.disabled = true;
-            selectTz.appendChild(opt);
-            posixInput.value = '';
-        });
 
         function openNav() {
             const overlay = document.getElementById("myNav");
@@ -625,6 +562,7 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
                 document.getElementById("menuIcon").style.display = "block";
             }, 0);
         }
+
         function openMap() {
             const latitudeInput = document.getElementById('latitude');
             const longitudeInput = document.getElementById('longitude');
@@ -634,368 +572,6 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
             } else {
                 showToast('Lütfen geçerli bir link girin!');
             }
-        }
-    </script>
-</body>
-
-</html>
-)rawliteral";
-
-static const char Currency_Page[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html lang="%LANG%">
-
-<head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <title>%CURRENCYSETTINGS%</title>
-    <style>
-        :root {
-            --bg-color: #121212;
-            --text-color: #eeeeee;
-            --input-bg: #2a2a2a;
-            --button-bg: #388e3c;
-            --button-text: #ffffff;
-            --accent-color: #66bb6a;
-            --shadow: 0 2px 12px rgba(0, 0, 0, 0.5);
-        }
-
-        html,
-        body {
-            height: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            margin: 0;
-            font-family: Arial, sans-serif;
-            background: var(--bg-color);
-            color: var(--text-color);
-            transition: background 0.3s, color 0.3s;
-        }
-
-        .container {
-            max-width: 400px;
-            margin: 0 auto;
-            padding: 1rem;
-            transition: all 0.3s ease-in-out;
-        }
-
-        h1 {
-            text-align: center;
-            font-size: 1.6rem;
-            margin-bottom: 1.5rem;
-            color: var(--accent-color);
-            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.1);
-        }
-
-        .setting {
-            margin-bottom: 1.2rem;
-        }
-
-        label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: bold;
-        }
-
-        select,
-        button {
-            width: 100%;
-            box-sizing: border-box;
-            padding: 0.75rem;
-            background: var(--input-bg);
-            border: 2px solid var(--accent-color);
-            border-radius: 8px;
-            font-size: 1rem;
-            color: var(--text-color);
-            transition: all 0.3s ease-in-out;
-        }
-
-        button {
-            background: var(--button-bg);
-            color: var(--button-text);
-            border: none;
-            margin-top: 1rem;
-            cursor: pointer;
-            font-weight: bold;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
-
-        button:hover:not(:disabled) {
-            opacity: 0.95;
-            transform: scale(1.01);
-        }
-
-        button:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none;
-        }
-
-        input:focus,
-        select:focus {
-            outline: none;
-            border-color: var(--accent-color);
-            box-shadow: 0 0 6px var(--accent-color);
-        }
-
-        .buttons {
-            margin-top: 1rem;
-        }
-
-        .centered-text {
-            text-align: center;
-            font-weight: bold;
-            margin-bottom: 0.8rem;
-            font-size: 1.3rem;
-            color: var(--accent-color);
-            margin-top: 2rem;
-        }
-
-        #toast {
-            visibility: hidden;
-            min-width: 250px;
-            margin-left: -125px;
-            background-color: var(--accent-color);
-            color: white;
-            text-align: center;
-            border-radius: 8px;
-            padding: 1rem;
-            position: fixed;
-            top: 1rem;
-            left: 50%;
-            z-index: 1100;
-            font-size: 1rem;
-            box-shadow: var(--shadow);
-            transition: visibility 0s, opacity 0.5s ease-in-out;
-            opacity: 0;
-        }
-
-        #toast.show {
-            visibility: visible;
-            opacity: 1;
-        }
-
-        .overlay {
-            height: 100%;
-            width: 0;
-            position: fixed;
-            z-index: 1;
-            top: 0;
-            left: 0;
-            background-color: rgba(0, 0, 0, 0.9);
-            overflow-x: hidden;
-            transition: 0.5s;
-        }
-
-        .overlay-content {
-            position: relative;
-            top: 10%;
-            width: 100%;
-            margin-top: 0;
-            text-align: center;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .overlay-content a {
-            display: block;
-            padding: 8px 16px;
-            text-decoration: none;
-            font-size: 36px;
-            color: #818181;
-            margin: 5px 0;
-            transition: 0.3s;
-            white-space: normal;
-            word-wrap: break-word;
-        }
-
-        .overlay a:hover,
-        .overlay a:focus {
-            color: #f1f1f1;
-        }
-
-        .overlay .closebtn {
-            position: absolute;
-            top: 20px;
-            right: 45px;
-            font-size: 60px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        @media screen and (max-height: 450px) {
-            .overlay a {
-                font-size: 20px
-            }
-
-            .overlay .closebtn {
-                font-size: 40px;
-                top: 15px;
-                right: 35px;
-            }
-        }
-
-        .menu-icon {
-            font-size: 30px;
-            cursor: pointer;
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 2;
-        }
-
-        @media screen and (max-width: 600px) {
-            .menu-icon {
-                top: 15px;
-                right: 15px;
-            }
-
-            h1 {
-                padding-top: 60px;
-            }
-        }
-    </style>
-</head>
-
-<body>
-    <div id="toast" role="alert" aria-live="assertive" aria-atomic="true"></div>
-
-    <main class="container" role="main">
-        <h1>%CURRENCYSETTINGS%</h1>
-        <form id="deviceForm" action="/savecurrency" method="GET">
-            <div class="centered-text">%APIWARNINGTEXT%</div>
-            <div class="centered-text">%CURRENCY1TEXT%</div>
-            <div class="setting">
-                <label for="base1text">%BASETEXT%</label>
-                <select id="base1" name="base1"></select>
-            </div>
-            <div class="setting">
-                <label for="target1text">%TARGETTEXT%</label>
-                <select id="target1" name="target1"></select>
-            </div>
-            <div class="centered-text">%CURRENCY2TEXT%</div>
-            <div class="setting">
-                <label for="base2text">%BASETEXT%</label>
-                <select id="base2" name="base2"></select>
-            </div>
-            <div class="setting">
-                <label for="target2text">%TARGETTEXT%</label>
-                <select id="target2" name="target2"></select>
-            </div>
-            <div class="buttons">
-                <button type="submit" id="submitBtn">
-                    <i class="fas fa-floppy-disk"></i> %SAVETEXT% </button>
-            </div>
-        </form>
-    </main>
-    <div id="myNav" class="overlay">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">&times;</a>
-        <div class="overlay-content">
-            <a href="/"><i class="fas fa-home"></i> %HOMETEXT%</a>
-            <a href="/apikey"><i class="fas fa-key"></i> %APIKEYSETTINGS%</a>
-            <a href="/device"><i class="fas fa-cogs"></i> %DEVICESETTINGS%</a>
-            <a href="/display"><i class="fas fa-desktop"></i> %DISPLAYSETTINGS%</a>
-            <a href="/security"><i class="fas fa-lock"></i> %SECURITYSETTINGS%</a>
-            <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
-            <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
-        </div>
-    </div>
-    <span id="menuIcon" class="menu-icon" onclick="openNav()">&#9776;</span>
-    <script>
-
-        let lang = "%LANG%".toLowerCase();
-        if (lang != "tr" && lang != "en") {
-            lang = "en";
-        }
-
-        const githubJsonUrl = `https://raw.githubusercontent.com/idezentas/esp8266_WeatherStation/refs/heads/main/currency-${lang}.json`;
-
-        const selections = {
-            base1: "%BASE1%",
-            target1: "%TARGET1%",
-            base2: "%BASE2%",
-            target2: "%TARGET2%"
-        };
-
-        fetch(githubJsonUrl).then(res => res.json()).then(data => {
-            const codes = Object.keys(data);
-            function fillSelect(id, selected) {
-                const sel = document.getElementById(id);
-                sel.innerHTML = "";
-                codes.forEach(code => {
-                    const option = document.createElement("option");
-                    option.value = code;
-                    option.textContent = `${code.toUpperCase()} - ${data[code].name} (${data[code].symbol})`;
-                    if (code.toUpperCase() === selected.toUpperCase()) option.selected = true;
-                    sel.appendChild(option);
-                });
-            }
-            fillSelect("base1", selections.base1);
-            fillSelect("target1", selections.target1);
-            fillSelect("base2", selections.base2);
-            fillSelect("target2", selections.target2);
-        }).catch(err => {
-            console.error("%CURRENCYALERT%", err);
-        });
-
-        const form = document.getElementById('deviceForm');
-        const submitBtn = document.getElementById('submitBtn');
-        const toast = document.getElementById('toast');
-
-        function showToast(message) {
-            toast.textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
-        form.addEventListener("submit", function (e) {
-            const b1 = document.getElementById("base1").value;
-            const t1 = document.getElementById("target1").value;
-            const b2 = document.getElementById("base2").value;
-            const t2 = document.getElementById("target2").value;
-
-            if ((b1 === t1 && b1 !== "") || (b2 === t2 && b2 !== "")) {
-                e.preventDefault();
-                showToast("%CURRENCYALERT2%");
-                submitBtn.disabled = false;
-            } else {
-                submitBtn.disabled = true;
-                showToast("%FORMSENDING%");
-            }
-        });
-
-        function openNav() {
-            const overlay = document.getElementById("myNav");
-            const content = document.querySelector(".overlay-content");
-            const closeBtn = document.querySelector(".closebtn");
-
-            overlay.style.width = "100%";
-            document.getElementById("menuIcon").style.display = "none";
-
-            setTimeout(() => {
-                content.style.opacity = "1";
-                closeBtn.style.opacity = "1";
-            }, 0);
-        }
-
-        function closeNav() {
-            const overlay = document.getElementById("myNav");
-            const content = document.querySelector(".overlay-content");
-            const closeBtn = document.querySelector(".closebtn");
-
-            content.style.opacity = "0";
-            closeBtn.style.opacity = "0";
-
-            setTimeout(() => {
-                overlay.style.width = "0%";
-                document.getElementById("menuIcon").style.display = "block";
-            }, 0);
         }
     </script>
 </body>
@@ -1256,7 +832,6 @@ static const char Display_Settings_Page[] PROGMEM = R"rawliteral(
             <a href="/apikey"><i class="fas fa-key"></i> %APIKEYSETTINGS%</a>
             <a href="/device"><i class="fas fa-cogs"></i> %DEVICESETTINGS%</a>
             <a href="/security"><i class="fas fa-lock"></i> %SECURITYSETTINGS%</a>
-            <a href="/currency"><i class="fas fa-money-bill"></i> %CURRENCYSETTINGS%</a>
             <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
             <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
         </div>
@@ -1529,7 +1104,6 @@ static const char Security_Page[] PROGMEM = R"rawliteral(
             <a href="/apikey"><i class="fas fa-key"></i> %APIKEYSETTINGS%</a>
             <a href="/device"><i class="fas fa-cogs"></i> %DEVICESETTINGS%</a>
             <a href="/display"><i class="fas fa-desktop"></i> %DISPLAYSETTINGS%</a>
-            <a href="/currency"><i class="fas fa-money-bill"></i> %CURRENCYSETTINGS%</a>
             <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
             <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
         </div>
@@ -1849,7 +1423,6 @@ static const char ApiKey_Page[] PROGMEM = R"rawliteral(
             <a href="/device"><i class="fas fa-cogs"></i> %DEVICESETTINGS%</a>
             <a href="/display"><i class="fas fa-desktop"></i> %DISPLAYSETTINGS%</a>
             <a href="/security"><i class="fas fa-lock"></i> %SECURITYSETTINGS%</a>
-            <a href="/currency"><i class="fas fa-money-bill"></i> %CURRENCYSETTINGS%</a>
             <a href="/update"><i class="fas fa-upload"></i> %OTATEXT%</a>
             <a href="https://github.com/idezentas"><i class="fas fa-question-circle"></i> %ABOUTTEXT%</a>
         </div>
@@ -1962,23 +1535,6 @@ static const char Save_Settings_Page[] PROGMEM = R"rawliteral(
 </html>
 )rawliteral";
 
-static const char Save_Currency_Page[] PROGMEM = R"rawliteral(
-<!DOCTYPE html>
-<html lang="%LANG%">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>%CURRENCYSETTINGS%</title>
-  </head>
-  <body>
-    <h3>%CURRENCYTEXT%</h3>
-    <script>
-      setTimeout(()=>location.href='/', 3000);
-    </script>
-  </body>
-</html>
-)rawliteral";
-
 static const char Save_Security_Page[] PROGMEM = R"rawliteral(
 <!DOCTYPE html>
 <html lang="%LANG%">
@@ -1988,7 +1544,7 @@ static const char Save_Security_Page[] PROGMEM = R"rawliteral(
     <title>%SECURITYSETTINGS%</title>
   </head>
   <body>
-    <h3>%DEVICETEXT%</h3>
+    <h3>%SECURITYTEXT%</h3>
     <script>
       setTimeout(()=>location.href='/', 3000);
     </script>

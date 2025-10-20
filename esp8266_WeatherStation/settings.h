@@ -1,16 +1,15 @@
 #include <Arduino.h>
 
-#define VERSION "1.3"
+#define VERSION "1.4"
 
 String SysUser = "admin";
 String SysPass = "esp8266";
 const int WEBSERVER_PORT = 80; // The port you can access this device on over HTTP
 
-const String configName = "/config.json";
-const String securityConfig = "/security.json";
-const String CurrencyConfig = "/currency.json";
-const String displayConfig = "/display.json";
-const String ApiKeyConfig = "/apikey.json";
+const String configName = "/config.txt";
+const String securityConfig = "/security.txt";
+const String displayConfig = "/display.txt";
+const String ApiKeyConfig = "/apikey.txt";
 
 #define HOSTNAME "WeatherStat-AP"
 
@@ -18,7 +17,7 @@ const String ApiKeyConfig = "/apikey.json";
 #define NTP_SERVERS "pool.ntp.org"
 
 // Setup
-int UPDATE_INTERVAL = 30; // Update every 30 minutes
+int UPDATE_INTERVAL = 15; // Update every 15 minutes
 int UPDATE_INTERVAL_SECS = UPDATE_INTERVAL * 60;
 
 String timeDisplayTurnsOn = "08:00";  // 24 Hour Format HH:MM -- Leave blank for always on. (ie 05:30)
@@ -44,13 +43,3 @@ boolean IS_METRIC = true;
 
 // OpenCage Settings
 String OPEN_CAGE_ID = ""; // Sign up here to get an API key: https://opencagedata.com
-
-// Currency Settings
-// https://raw.githubusercontent.com/idezentas/esp8266_WeatherStation/refs/heads/main/currency-en.json
-// https://raw.githubusercontent.com/idezentas/esp8266_WeatherStation/refs/heads/main/currency-tr.json
-
-String BaseCurrency1 = "eur";
-String TargetCurrency1 = "try";
-
-String BaseCurrency2 = "usd";
-String TargetCurrency2 = "try";

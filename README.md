@@ -8,15 +8,15 @@ This project is based on the [ThingPulse - WeatherStationDemo](https://github.co
 - Settings Pages: Device, Security, API Keys, Display, Currency Rates, and Restore to Default Settings
 - OTA Updates: Remote firmware updates with ElegantOTA v3
 - WiFiManager: No hardcoded Wi-Fi credentials required.
-- Live Weather, Air Quality (AQI), Forecasts: From OpenWeatherMap API
+- Live Weather, Air Quality, Forecasts: From OpenWeatherMap API
 - UV Index: Real-time UV data from Open-Meteo API
-- Currency Rates: From Floatrates API
 - Time & Date Display: Synced using NTP servers. Automatic daylight saving time compatibility is available.
 - Night Mode: OLED display turns off/on automatically based on configured time.
 - Display Rotation: Flip the OLED display vertically.
 - Mobile-Friendly Interface: Fully responsive design
 - Multi-language Support: Currently supports **Turkish** and **English**
 - Indoor: Temperature and humidity data were obtained using a DHT22 sensor.
+- OLED Screen Pages: Time and date, City and country name, Temperature, Humidity, Indoor temperature, Indoor humidity, Wind speed and direction, Air quality, UV index, Weather forecasts (2 pages), Sunrise/sunset, Moonrise/moonset and phase, Wi-Fi network name and signal strength, IP address, Next update
 
 ## Web Interface Screenshots
 
@@ -39,10 +39,6 @@ Display Settings
 Security Settings
 
 <img src="images/security-en.png" alt="Security Settings" width="300"/>
-
-Currency Settings
-
-<img src="images/currency-en.png" alt="Currency Settings" width="300"/>
 
 Menu Example
 
@@ -88,7 +84,6 @@ Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/e
   - [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA)
   - [WiFiManager](https://github.com/tzapu/WiFiManager)
   - [Json Streaming Parser](https://github.com/squix78/json-streaming-parser)
-  - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
   - [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor)
   - [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
 
@@ -128,10 +123,6 @@ Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/e
   - Enter the turn on and turn off times for night mode scheduling.  
   - Click the **Save** button. After clicking, you will be automatically redirected to the home page. At the same time, the data will be updated with the new values on the OLED display.
 
-- Then, go to the **Currency Rate Settings** page via the web interface:
-  - Select the base currency and target currency for 2 currency rates.
-  - Click the **Save** button. After clicking, you will be automatically redirected to the main page. At the same time, the data will be updated with the new values on the OLED display.
-
 - After checking the values you have selected on the OLED display, you can start using it with peace of mind.
 
 - To change the settings you have selected at a later time, you can go to the relevant page on the web interface and make the necessary changes.
@@ -144,10 +135,9 @@ Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/e
 - Weather Data: [OpenWeatherMap](https://openweathermap.org)  
 - UV Index: [Open-Meteo](https://open-meteo.com)  
 - Time Sync: [NTP Servers](https://pool.ntp.org)  
-- WiFi Config Portal: [WiFiManager](https://github.com/tzapu/WiFiManager)  
-- Currency Data: [Floatrates](https://www.floatrates.com)  
+- WiFi Config Portal: [WiFiManager](https://github.com/tzapu/WiFiManager)
 - Night Mode and Display Rotation Feature: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
-- JSON Libraries: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) and [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+- JSON Library: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser)
 - Timezones: [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)
 - DHT22 Libraries: [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) and [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
 
@@ -161,15 +151,15 @@ Bu proje, [ThingPulse - WeatherStationDemo](https://github.com/ThingPulse/esp826
 - Ayarlar Sayfaları: Cihaz, Güvenlik, API Anahtarları, Ekran, Döviz Kurları ve Varsayılan ayarlara sıfırlama
 - OTA Güncelleme: ElegantOTA ile uzaktan yazılım güncellemeleri
 - WiFiManager: Gömülü Wi-Fi adı/şifresi gerekmeden yapılandırma
-- Anlık Hava Durumu, Hava Kalitesi (AQI), Hava Tahminleri: OpenWeatherMap üzerinden alınmaktadır.
+- Anlık Hava Durumu, Hava Kalitesi, Hava Tahminleri: OpenWeatherMap üzerinden alınmaktadır.
 - UV İndeksi: Open-Meteo API'den gerçek zamanlı UV bilgisi
-- Döviz Kurları: Floatrates API üzerinden alınmaktadır.
 - Saat & Tarih Gösterimi: NTP sunucusu üzerinden alınmaktadır. Otomatik yaz saati uyumluluğu bulunmaktadır.
 - Gece Modu : Belirtilen saatlerde OLED ekran otomatik açılır/kapanır.
 - Ekran Döndürme: OLED ekranı dikey olarak döndürme
 - Mobil Uyumlu Arayüz: Tüm cihazlarda uyumlu tasarım
 - Çoklu Dil Desteği: Şu anda **Türkçe** ve **İngilizce** arayüz seçeneği
 - İç Mekan: DHT22 sensörü ile sıcaklık ve nem bilgileri elde edildi.
+- OLED Ekrandaki Sayfalar: Saat ve tarih, Şehir ve ülke adı, Hava sıcaklığı, Nem, İç mekan sıcaklığı, İç mekan nemi, Rüzgar hızı ve yönü, Hava kalitesi, UV indeksi, Hava tahminleri (2 Sayfa), Güneşin doğuşu/batışı, Ayın doğuşu/batışı ve evresi, Wifi ağ adı ve sinyal kalitesi, IP adresi, Sonraki güncelleme
 
 ## Web Arayüzü Ekran görüntüleri
 
@@ -192,10 +182,6 @@ Ekran Ayarları
 Güvenlik Ayarları
 
 <img src="images/security-tr.png" alt="Güvenlik Ayarları" width="300"/>
-
-Döviz Kuru Ayarları
-
-<img src="images/currency-tr.png" alt="Döviz Kuru Ayarları" width="300"/>
 
 Menü Örneği
 
@@ -241,7 +227,6 @@ Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutoria
   - [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA)
   - [WiFiManager](https://github.com/tzapu/WiFiManager)
   - [Json Streaming Parser](https://github.com/squix78/json-streaming-parser)
-  - [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
   - [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor)
   - [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
 
@@ -281,10 +266,6 @@ Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutoria
   - Gece modu zamanlaması için açılış ve kapanış zamanlarını giriniz.
   - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir. Aynı zamanda OLED ekranda yeni değerler ile veriler güncellenecektir.
 
-- Daha sonra web arayüzü üzerinden önce **Döviz Kurları Ayarları** sayfasına giderek:
-  - 2 tane döviz kuru için temel para birimi ve hedef para birimi seçiniz.
-  - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir. Aynı zamanda OLED ekranda yeni değerler ile veriler güncellenecektir.
-
 - OLED ekran üzerinden seçtiğiniz değerleri kontrol ettikten sonra gönül rahatlığıyla kullanmaya başlayabilirsiniz.
 
 - Başka bir zaman seçtiğiniz ayarı değiştirmek için web arayüzünde ilgili sayfaya giderek gerekli değişiklikleri yapabilirsiniz.
@@ -298,8 +279,7 @@ Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutoria
 - UV Verisi: [Open-Meteo](https://open-meteo.com)  
 - Saat: [NTP Sunucuları](https://pool.ntp.org)  
 - WiFi Kurulumu: [WiFiManager](https://github.com/tzapu/WiFiManager)  
-- Döviz Verisi: [Floatrates](https://www.floatrates.com)  
 - Gece Modu ve Ekran Döndürme Özelliği: [Qrome / PrinterMonitor](https://github.com/Qrome/printer-monitor)
-- JSON Kütüphaneleri: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser) ve [ArduinoJson](https://github.com/bblanchon/ArduinoJson)
+- JSON Kütüphanesi: [Json Streaming Parser](https://github.com/squix78/json-streaming-parser)
 - Zaman Dilimleri: [posix_tz_db](https://github.com/nayarsystems/posix_tz_db)
 - DHT22 Kütüphaneleri: [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor) ve [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
