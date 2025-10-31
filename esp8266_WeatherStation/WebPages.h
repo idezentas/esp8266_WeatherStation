@@ -380,6 +380,13 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
         <h1>%DEVICESETTINGS%</h1>
         <form action="/savedevice" method="GET" id="deviceForm">
             <div class="setting">
+                <label for="sysLang">%SYSLANG%</label>
+                <select id="sysLang" name="sysLang">
+                    <option value="lang-tr" %LANGTR%>Türkçe</option>
+                    <option value="lang-en" %LANGEN%>English</option>
+                </select>
+            </div>
+            <div class="setting">
                 <label for="city">%CITYTEXT%</label>
                 <input type="text" id="city" name="city" required placeholder="%CITYPLACE%" value="%CITY%"
                     autocomplete="address-level2" autocorrect="on" spellcheck="true">
@@ -409,7 +416,8 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
             </div>
             <div class="setting">
                 <label for="timezoneName">%TZNAMETEXT%</label>
-                <input type="text" id="timezoneName" name="timezoneName" placeholder="%TZNAMEPLACE%" value="%TZNAME%" readonly />
+                <input type="text" id="timezoneName" name="timezoneName" placeholder="%TZNAMEPLACE%" value="%TZNAME%"
+                    readonly />
             </div>
             <div class="setting">
                 <input type="hidden" id="posixInput" name="posixInput" readonly />
@@ -500,7 +508,7 @@ static const char Device_Page[] PROGMEM = R"rawliteral(
             const country = document.getElementById('country').value.trim();
             const geoApiKey = "%GEOAPIKEY%";
             let lang = "%LANG%".toLowerCase();
-            if (lang != "tr" && lang != "en") {lang = "en";}
+            if (lang != "tr" && lang != "en") { lang = "en"; }
 
             if (!city || !country || !geoApiKey) {
                 showToast("%GEOALERT%");

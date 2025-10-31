@@ -1,6 +1,7 @@
 /**The MIT License (MIT)
 
  Copyright (c) 2025 by idezentas
+ Thanks to ThingPulse Ltd., https://thingpulse.com
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -117,7 +118,7 @@ void OpenWeatherMapAir::key(String key)
 
 void OpenWeatherMapAir::value(String value)
 {
-  // "aqi": 2, uint16_t aqi;
+  // "aqi": 2, uint8_t aqi;
   if (currentParent == "main" && currentKey == "aqi")
   {
     this->data->aqi = value.toInt();

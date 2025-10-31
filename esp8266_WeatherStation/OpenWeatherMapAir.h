@@ -28,7 +28,7 @@
 
 typedef struct OpenWeatherMapAirData {
   // "aqi": 2
-  int aqi;
+  uint8_t aqi;
   // "dt": 1527015000,
   uint32_t observationTime;
 } OpenWeatherMapAirData;

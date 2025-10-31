@@ -1,10 +1,14 @@
 #include <Arduino.h>
+#include "lang_tr.h"
+#include "lang_en.h"
 
-#define VERSION "1.4"
+#define VERSION "1.5"
+
+String currentLang = "en"; // tr or en
 
 String SysUser = "admin";
 String SysPass = "esp8266";
-const int WEBSERVER_PORT = 80; // The port you can access this device on over HTTP
+const uint8_t WEBSERVER_PORT = 80; // The port you can access this device on over HTTP
 
 const String configName = "/config.txt";
 const String securityConfig = "/security.txt";
@@ -27,19 +31,19 @@ String timeDisplayTurnsOff = "00:00"; // 24 Hour Format HH:MM -- Leave blank for
 const int I2C_DISPLAY_ADDRESS = 0x3c;
 const int SDA_PIN = D2;
 const int SDC_PIN = D1;
-boolean INVERT_DISPLAY = false; // true = pins at top | false = pins at the bottom
-int Disp_Contrast = 255;        // 0 = zero brightness | 255 = full brightness
+bool INVERT_DISPLAY = false; // true = pins at top | false = pins at the bottom
+uint8_t Disp_Contrast = 255;        // 0 = zero brightness | 255 = full brightness
 bool IS_24HOUR = true;      	// true = use 24 hour | false = use 12 hour
 bool SHOW_MNAME = true;      	// true = show month name | false = show month number
 
 // OpenWeatherMap Settings
 String OPEN_WEATHER_MAP_APP_ID = ""; // Sign up here to get an API key: https://openweathermap.org
-float OPEN_WEATHER_MAP_LOCATION_LAT = 41.17;
-float OPEN_WEATHER_MAP_LOCATION_LON = 28.86;
+float OPEN_WEATHER_MAP_LOCATION_LAT = 41.0063820;
+float OPEN_WEATHER_MAP_LOCATION_LON = 28.9758720;
 String Display_City_Name = "İstanbul";
 String Display_Country_Name = "Türkiye";
 String Display_TZ_NAME = "Europe/Istanbul";
-boolean IS_METRIC = true;
+bool IS_METRIC = true;
 
 // OpenCage Settings
 String OPEN_CAGE_ID = ""; // Sign up here to get an API key: https://opencagedata.com

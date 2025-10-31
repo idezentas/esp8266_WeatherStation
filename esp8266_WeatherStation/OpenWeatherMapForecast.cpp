@@ -1,6 +1,7 @@
 /**The MIT License (MIT)
 
  Copyright (c) 2018 by ThingPulse Ltd., https://thingpulse.com
+Edited by idezentas
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -175,24 +176,6 @@ void OpenWeatherMapForecast::value(String value)
     Serial.printf_P(PSTR("temp: %.2f\n"), value.toFloat());
     // initialize potentially empty values:
     data[currentForecast].rain = 0;
-  }
-  //   "feels_like": 16.99, float feelsLike;
-  if (currentKey == "feels_like")
-  {
-    data[currentForecast].feelsLike = value.toFloat();
-    Serial.printf_P(PSTR("feelsLike: %.2f\n"), value.toFloat());
-  }
-  //   "temp_min":16.89, float tempMin;
-  if (currentKey == "temp_min")
-  {
-    data[currentForecast].tempMin = value.toFloat();
-    Serial.printf_P(PSTR("tempMin: %.2f\n"), value.toFloat());
-  }
-  //   "temp_max":17.35,float tempMax;
-  if (currentKey == "temp_max")
-  {
-    data[currentForecast].tempMax = value.toFloat();
-    Serial.printf_P(PSTR("tempMax: %.2f\n"), value.toFloat());
   }
   //   "pressure":970.8,float pressure;
   if (currentKey == "pressure")

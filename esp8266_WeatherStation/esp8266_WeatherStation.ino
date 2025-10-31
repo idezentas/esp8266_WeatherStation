@@ -49,9 +49,8 @@
 #include "WindDirectionImages.h"
 #include "WeatherImages.h"
 #include "DirectionImages.h"
-#include "settings.h"
 #include "WebPages.h"
-#include "lang_tr.h" // System Language. Select one of them. lang_en or lang_tr
+#include "settings.h"
 
 SSD1306Wire display(I2C_DISPLAY_ADDRESS, SDA_PIN, SDC_PIN);
 OLEDDisplayUi ui(&display);
@@ -62,7 +61,7 @@ OLEDDisplayUi ui(&display);
 
 DHT dht(DHTPIN, DHTTYPE);
 
-const uint8_t MAX_FORECASTS = 4;
+const uint8_t MAX_FORECASTS = 5;
 
 OpenWeatherMapCurrent currentWeatherClient;
 OpenWeatherMapCurrentData currentWeather;
@@ -90,7 +89,9 @@ unsigned long ota_progress_millis = 0;
 
 String Display_TZ_POSIX = "<+03>-3";
 String Display_TZ_NAME_SHORT = "<+03>";
-int Display_GMTOffset = 3; // (utc+) TZ in hours
+int8_t Display_GMTOffset = 3; // (utc+) TZ in hours
+
+LanguagePack lang;
 
 ESP8266WebServer server(WEBSERVER_PORT);
 
@@ -114,13 +115,14 @@ void drawUVIndex(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int
 void drawUntilToNextUpdate(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y);
 void drawCurrentRoomTemp(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y);
 void drawCurrentRoomHum(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y);
+void drawPressure(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y);
 void setReadyForWeatherUpdate();
 String UpperText(String text);
 String CleanText(String text);
 int8_t getWifiQuality();
 String encodeHtmlString(String msg);
 String getMoonPhasesIcon(uint8_t icon);
-int getUVindexText(int index);
+uint8_t getUVindexText(uint8_t index);
 void checkDisplay();
 void enableDisplay(bool enable);
 void loadDeviceSettings();
@@ -150,11 +152,12 @@ void handleUpdateData();
 void onOTAStart();
 void onOTAProgress(size_t current, size_t final);
 void onOTAEnd(bool success);
-int get12Hour(int hour);
-String getAMPM(int hour);
+uint8_t get12Hour(uint8_t hour);
+String getAMPM(uint8_t hour);
+void applyLanguage();
 
-FrameCallback frames[] = {drawDateTime, drawCity, drawCurrentWeather, drawCurrentWeatherHum, drawCurrentRoomTemp, drawCurrentRoomHum, drawWind, drawAirQuality, drawUVIndex, drawForecast, drawForecast2, drawSun, drawMoon, drawWifiInfo, drawIPInfo, drawUntilToNextUpdate};
-int numberOfFrames = 16;
+FrameCallback frames[] = {drawDateTime, drawCity, drawCurrentWeather, drawCurrentWeatherHum, drawCurrentRoomTemp, drawCurrentRoomHum, drawWind, drawAirQuality, drawUVIndex, drawPressure, drawForecast, drawForecast2, drawSun, drawMoon, drawWifiInfo, drawIPInfo, drawUntilToNextUpdate};
+int numberOfFrames = 17;
 
 OverlayCallback overlays[] = {drawHeaderOverlay};
 int numberOfOverlays = 1;
@@ -171,6 +174,8 @@ void setup()
 
   loadAllConfigs();
   // removeAllConfigs();
+
+  applyLanguage();
 
   display.init();
 
@@ -190,7 +195,7 @@ void setup()
   display.setFont(ArialMT_Plain_16);
   display.drawString(64, 1, "ESP8266");
   display.setFont(ArialMT_Plain_10);
-  display.drawString(64, 18, CleanText(LOG_TEXT[0]));
+  display.drawString(64, 18, CleanText(lang.LOG_WEATHER_STATION));
   display.setFont(ArialMT_Plain_16);
   display.drawString(64, 30, "By idezentas");
   display.drawString(64, 46, "V" + String(VERSION));
@@ -216,17 +221,17 @@ void setup()
   SSID_String = wifiManager.getWiFiSSID();
   Serial.println();
 
-  if (SYSTEM_LANG == "tr")
+  if (currentLang == "tr")
   {
-    Serial.printf_P(PSTR("%s: %%%d\n"), CleanText(LOG_TEXT[1]).c_str(), getWifiQuality());
+    Serial.printf_P(PSTR("%s: %%%d\n"), CleanText(lang.LOG_RSSI).c_str(), getWifiQuality());
   }
-  else if (SYSTEM_LANG == "en")
+  else if (currentLang == "en")
   {
-    Serial.printf_P(PSTR("%s: %d%%\n"), CleanText(LOG_TEXT[1]).c_str(), getWifiQuality());
+    Serial.printf_P(PSTR("%s: %d%%\n"), CleanText(lang.LOG_RSSI).c_str(), getWifiQuality());
   }
   else
   {
-    Serial.printf_P(PSTR("%s: %d%%\n"), CleanText(LOG_TEXT[1]).c_str(), getWifiQuality());
+    Serial.printf_P(PSTR("%s: %d%%\n"), CleanText(lang.LOG_RSSI).c_str(), getWifiQuality());
   }
 
   Serial.println();
@@ -238,24 +243,12 @@ void setup()
   display.setFont(ArialMT_Plain_16);
   display.drawString(64, 0, "SSID");
   display.setFont(ArialMT_Plain_10);
-  display.drawString(64, 20, wifiManager.getWiFiSSID());
-  if (SYSTEM_LANG == "tr")
-  {
-    display.drawString(64, 35, "%" + String(getWifiQuality()));
-  }
-  else if (SYSTEM_LANG == "en")
-  {
-    display.drawString(64, 35, String(getWifiQuality()) + "%");
-  }
-  else
-  {
-    display.drawString(64, 35, String(getWifiQuality()) + "%");
-  }
+  display.drawStringMaxWidth(64, 20, 128, wifiManager.getWiFiSSID());
   display.display();
   delay(250);
 
   String webAddress = "http://" + WiFi.localIP().toString() + ":" + String(WEBSERVER_PORT) + "/";
-  Serial.printf_P(PSTR("%s %s\n"), CleanText(LOG_TEXT[2]).c_str(), webAddress.c_str());
+  Serial.printf_P(PSTR("%s %s\n"), CleanText(lang.LOG_USE_THIS_URL).c_str(), webAddress.c_str());
   Serial.println();
 
   delay(500);
@@ -264,13 +257,13 @@ void setup()
   display.setTextAlignment(TEXT_ALIGN_CENTER);
   display.setFont(ArialMT_Plain_16);
   display.drawString(64, 10, "IP");
-  display.drawString(64, 30, WiFi.localIP().toString());
+  display.drawStringMaxWidth(64, 30, 128, WiFi.localIP().toString());
   display.display();
   delay(250);
 
   configTime(0, 0, NTP_SERVERS);
 
-  Serial.println(CleanText(LOG_TEXT[22]).c_str());
+  Serial.println(CleanText(lang.LOG_WAIT_NTP).c_str());
   time_t now;
   const time_t VALID_TIME = 24 * 3600;
   while ((now = time(nullptr)) < VALID_TIME)
@@ -279,7 +272,7 @@ void setup()
     Serial.print(F("."));
   }
   Serial.print(F("\n"));
-  Serial.println(CleanText(LOG_TEXT[23]).c_str());
+  Serial.println(CleanText(lang.LOG_NTP_SYNCED).c_str());
 
   ui.setTargetFPS(30);
 
@@ -367,7 +360,7 @@ void drawProgress(OLEDDisplay *display, int percentage, String label)
 
 void updateData(OLEDDisplay *display)
 {
-  drawProgress(display, 15, CleanText(PROGRESS_TEXT[0]));
+  drawProgress(display, 15, CleanText(lang.PROGRESS_TEXT[0]));
   time_t Display_Timestamp = time(nullptr);
   setenv("TZ", Display_TZ_POSIX.c_str(), 1);
   tzset();
@@ -376,11 +369,11 @@ void updateData(OLEDDisplay *display)
   Serial.println(F("Display_Timestamp\n"));
   if (SHOW_MNAME)
   {
-    Serial.printf_P(PSTR("%s, %02d %s %04d "), CleanText(WDAY_NAMES[timeInfo.tm_wday]).c_str(), timeInfo.tm_mday, CleanText(MONTH_NAMES[timeInfo.tm_mon]).c_str(), timeInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("%s, %02d %s %04d "), CleanText(lang.WDAY_NAMES[timeInfo.tm_wday]).c_str(), timeInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeInfo.tm_mon]).c_str(), timeInfo.tm_year + 1900);
   }
   else
   {
-    Serial.printf_P(PSTR("%s, %02d/%02d/%04d "), CleanText(WDAY_NAMES[timeInfo.tm_wday]).c_str(), timeInfo.tm_mday, timeInfo.tm_mon + 1, timeInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("%s, %02d/%02d/%04d "), CleanText(lang.WDAY_NAMES[timeInfo.tm_wday]).c_str(), timeInfo.tm_mday, timeInfo.tm_mon + 1, timeInfo.tm_year + 1900);
   }
   if (IS_24HOUR)
   {
@@ -393,20 +386,21 @@ void updateData(OLEDDisplay *display)
   (Display_GMTOffset >= 0) ? (Serial.printf_P(PSTR("%s+%d\n"), "GMT", Display_GMTOffset)) : (Serial.printf_P(PSTR("%s%d\n"), "GMT", Display_GMTOffset));
   Serial.println();
   delay(250);
-  drawProgress(display, 30, CleanText(PROGRESS_TEXT[1]));
+  drawProgress(display, 30, CleanText(lang.PROGRESS_TEXT[1]));
+  Serial.printf_P(PSTR("%s\n"), Display_City_Name);
   currentWeatherClient.setMetric(IS_METRIC);
-  currentWeatherClient.setLanguage(OPEN_WEATHER_MAP_LANGUAGE);
+  currentWeatherClient.setLanguage(lang.OPEN_WEATHER_MAP_LANGUAGE);
   currentWeatherClient.updateCurrent(&currentWeather, OPEN_WEATHER_MAP_KEY, OPEN_WEATHER_MAP_LOCATION_LAT, OPEN_WEATHER_MAP_LOCATION_LON);
   time_t observationTimestamp = currentWeather.observationTime;
   struct tm timeObserInfo;
   localtime_r(&observationTimestamp, &timeObserInfo);
   if (SHOW_MNAME)
   {
-    Serial.printf_P(PSTR("observationTimestamp: %s, %02d %s %04d "), CleanText(WDAY_NAMES[timeObserInfo.tm_wday]).c_str(), timeObserInfo.tm_mday, CleanText(MONTH_NAMES[timeObserInfo.tm_mon]).c_str(), timeObserInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("observationTimestamp: %s, %02d %s %04d "), CleanText(lang.WDAY_NAMES[timeObserInfo.tm_wday]).c_str(), timeObserInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeObserInfo.tm_mon]).c_str(), timeObserInfo.tm_year + 1900);
   }
   else
   {
-    Serial.printf_P(PSTR("observationTimestamp: %s, %02d/%02d/%04d "), CleanText(WDAY_NAMES[timeObserInfo.tm_wday]).c_str(), timeObserInfo.tm_mday, timeObserInfo.tm_mon + 1, timeObserInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("observationTimestamp: %s, %02d/%02d/%04d "), CleanText(lang.WDAY_NAMES[timeObserInfo.tm_wday]).c_str(), timeObserInfo.tm_mday, timeObserInfo.tm_mon + 1, timeObserInfo.tm_year + 1900);
   }
   if (IS_24HOUR)
   {
@@ -421,11 +415,11 @@ void updateData(OLEDDisplay *display)
   localtime_r(&sunriseTimestamp, &timeRiseInfo);
   if (SHOW_MNAME)
   {
-    Serial.printf_P(PSTR("sunriseTimestamp: %s, %02d %s %04d "), CleanText(WDAY_NAMES[timeRiseInfo.tm_wday]).c_str(), timeRiseInfo.tm_mday, CleanText(MONTH_NAMES[timeRiseInfo.tm_mon]).c_str(), timeRiseInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("sunriseTimestamp: %s, %02d %s %04d "), CleanText(lang.WDAY_NAMES[timeRiseInfo.tm_wday]).c_str(), timeRiseInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeRiseInfo.tm_mon]).c_str(), timeRiseInfo.tm_year + 1900);
   }
   else
   {
-    Serial.printf_P(PSTR("sunriseTimestamp: %s, %02d/%02d/%04d "), CleanText(WDAY_NAMES[timeRiseInfo.tm_wday]).c_str(), timeRiseInfo.tm_mday, timeRiseInfo.tm_mon + 1, timeRiseInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("sunriseTimestamp: %s, %02d/%02d/%04d "), CleanText(lang.WDAY_NAMES[timeRiseInfo.tm_wday]).c_str(), timeRiseInfo.tm_mday, timeRiseInfo.tm_mon + 1, timeRiseInfo.tm_year + 1900);
   }
   if (IS_24HOUR)
   {
@@ -440,11 +434,11 @@ void updateData(OLEDDisplay *display)
   localtime_r(&sunsetTimestamp, &timeSetInfo);
   if (SHOW_MNAME)
   {
-    Serial.printf_P(PSTR("sunsetTimestamp: %s, %02d %s %04d "), CleanText(WDAY_NAMES[timeSetInfo.tm_wday]).c_str(), timeSetInfo.tm_mday, CleanText(MONTH_NAMES[timeSetInfo.tm_mon]).c_str(), timeSetInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("sunsetTimestamp: %s, %02d %s %04d "), CleanText(lang.WDAY_NAMES[timeSetInfo.tm_wday]).c_str(), timeSetInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeSetInfo.tm_mon]).c_str(), timeSetInfo.tm_year + 1900);
   }
   else
   {
-    Serial.printf_P(PSTR("sunsetTimestamp: %s, %02d/%02d/%04d "), CleanText(WDAY_NAMES[timeSetInfo.tm_wday]).c_str(), timeSetInfo.tm_mday, timeSetInfo.tm_mon + 1, timeSetInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("sunsetTimestamp: %s, %02d/%02d/%04d "), CleanText(lang.WDAY_NAMES[timeSetInfo.tm_wday]).c_str(), timeSetInfo.tm_mday, timeSetInfo.tm_mon + 1, timeSetInfo.tm_year + 1900);
   }
   if (IS_24HOUR)
   {
@@ -457,7 +451,7 @@ void updateData(OLEDDisplay *display)
   Serial.println();
   delay(1000);
   forecastClient.setMetric(IS_METRIC);
-  forecastClient.setLanguage(OPEN_WEATHER_MAP_LANGUAGE);
+  forecastClient.setLanguage(lang.OPEN_WEATHER_MAP_LANGUAGE);
   uint8_t allowedHours[] = {12};
   forecastClient.setAllowedHours(allowedHours, sizeof(allowedHours));
   forecastClient.updateForecasts(forecasts, OPEN_WEATHER_MAP_KEY, OPEN_WEATHER_MAP_LOCATION_LAT, OPEN_WEATHER_MAP_LOCATION_LON, MAX_FORECASTS);
@@ -468,11 +462,11 @@ void updateData(OLEDDisplay *display)
   localtime_r(&observationAirTimestamp, &timeObserAirInfo);
   if (SHOW_MNAME)
   {
-    Serial.printf_P(PSTR("observationAirTimestamp: %s, %02d %s %04d "), CleanText(WDAY_NAMES[timeObserAirInfo.tm_wday]).c_str(), timeObserAirInfo.tm_mday, CleanText(MONTH_NAMES[timeObserAirInfo.tm_mon]).c_str(), timeObserAirInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("observationAirTimestamp: %s, %02d %s %04d "), CleanText(lang.WDAY_NAMES[timeObserAirInfo.tm_wday]).c_str(), timeObserAirInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeObserAirInfo.tm_mon]).c_str(), timeObserAirInfo.tm_year + 1900);
   }
   else
   {
-    Serial.printf_P(PSTR("observationAirTimestamp: %s, %02d/%02d/%04d "), CleanText(WDAY_NAMES[timeObserAirInfo.tm_wday]).c_str(), timeObserAirInfo.tm_mday, timeObserAirInfo.tm_mon + 1, timeObserAirInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("observationAirTimestamp: %s, %02d/%02d/%04d "), CleanText(lang.WDAY_NAMES[timeObserAirInfo.tm_wday]).c_str(), timeObserAirInfo.tm_mday, timeObserAirInfo.tm_mon + 1, timeObserAirInfo.tm_year + 1900);
   }
   if (IS_24HOUR)
   {
@@ -484,7 +478,7 @@ void updateData(OLEDDisplay *display)
   }
   Serial.println();
   delay(1000);
-  drawProgress(display, 45, CleanText(PROGRESS_TEXT[2]));
+  drawProgress(display, 45, CleanText(lang.PROGRESS_TEXT[2]));
   SunMoonCalc *smCalc = new SunMoonCalc(Display_Timestamp, OPEN_WEATHER_MAP_LOCATION_LAT, OPEN_WEATHER_MAP_LOCATION_LON);
   moonData = smCalc->calculateSunAndMoonData().moon;
   Serial.println();
@@ -493,11 +487,11 @@ void updateData(OLEDDisplay *display)
   localtime_r(&moonData.rise, &timeMoonRiseInfo);
   if (SHOW_MNAME)
   {
-    Serial.printf_P(PSTR("moonData.rise: %s, %02d %s %04d "), CleanText(WDAY_NAMES[timeMoonRiseInfo.tm_wday]).c_str(), timeMoonRiseInfo.tm_mday, CleanText(MONTH_NAMES[timeMoonRiseInfo.tm_mon]).c_str(), timeMoonRiseInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("moonData.rise: %s, %02d %s %04d "), CleanText(lang.WDAY_NAMES[timeMoonRiseInfo.tm_wday]).c_str(), timeMoonRiseInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeMoonRiseInfo.tm_mon]).c_str(), timeMoonRiseInfo.tm_year + 1900);
   }
   else
   {
-    Serial.printf_P(PSTR("moonData.rise: %s, %02d/%02d/%04d "), CleanText(WDAY_NAMES[timeMoonRiseInfo.tm_wday]).c_str(), timeMoonRiseInfo.tm_mday, timeMoonRiseInfo.tm_mon + 1, timeMoonRiseInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("moonData.rise: %s, %02d/%02d/%04d "), CleanText(lang.WDAY_NAMES[timeMoonRiseInfo.tm_wday]).c_str(), timeMoonRiseInfo.tm_mday, timeMoonRiseInfo.tm_mon + 1, timeMoonRiseInfo.tm_year + 1900);
   }
   if (IS_24HOUR)
   {
@@ -511,11 +505,11 @@ void updateData(OLEDDisplay *display)
   localtime_r(&moonData.set, &timeMoonSetInfo);
   if (SHOW_MNAME)
   {
-    Serial.printf_P(PSTR("moonData.set: %s, %02d %s %04d "), CleanText(WDAY_NAMES[timeMoonSetInfo.tm_wday]).c_str(), timeMoonSetInfo.tm_mday, CleanText(MONTH_NAMES[timeMoonSetInfo.tm_mon]).c_str(), timeMoonSetInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("moonData.set: %s, %02d %s %04d "), CleanText(lang.WDAY_NAMES[timeMoonSetInfo.tm_wday]).c_str(), timeMoonSetInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeMoonSetInfo.tm_mon]).c_str(), timeMoonSetInfo.tm_year + 1900);
   }
   else
   {
-    Serial.printf_P(PSTR("moonData.set: %s, %02d/%02d/%04d "), CleanText(WDAY_NAMES[timeMoonSetInfo.tm_wday]).c_str(), timeMoonSetInfo.tm_mday, timeMoonSetInfo.tm_mon + 1, timeMoonSetInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("moonData.set: %s, %02d/%02d/%04d "), CleanText(lang.WDAY_NAMES[timeMoonSetInfo.tm_wday]).c_str(), timeMoonSetInfo.tm_mday, timeMoonSetInfo.tm_mon + 1, timeMoonSetInfo.tm_year + 1900);
   }
   if (IS_24HOUR)
   {
@@ -526,21 +520,21 @@ void updateData(OLEDDisplay *display)
     Serial.printf_P(PSTR("%02d:%02d:%02d %s\n"), get12Hour(timeMoonSetInfo.tm_hour), timeMoonSetInfo.tm_min, timeMoonSetInfo.tm_sec, getAMPM(timeMoonSetInfo.tm_hour));
   }
   Serial.printf_P(PSTR("moonData.phase.index: %d, "), moonData.phase.index);
-  Serial.printf_P(PSTR("MOON_PHASE: %s\n"), CleanText(MOON_PHASES[moonData.phase.index]).c_str());
+  Serial.printf_P(PSTR("MOON_PHASE: %s\n"), CleanText(lang.MOON_PHASES[moonData.phase.index]).c_str());
   Serial.println();
   delay(250);
-  drawProgress(display, 60, CleanText(PROGRESS_TEXT[3]));
+  drawProgress(display, 60, CleanText(lang.PROGRESS_TEXT[3]));
   currentMeteoClient.updateWeather(&currentMeteo, OPEN_WEATHER_MAP_LOCATION_LAT, OPEN_WEATHER_MAP_LOCATION_LON);
   time_t timeTimestamp = currentMeteo.time;
   struct tm timeTimeInfo;
   localtime_r(&timeTimestamp, &timeTimeInfo);
   if (SHOW_MNAME)
   {
-    Serial.printf_P(PSTR("timeTimestamp: %s, %02d %s %04d "), CleanText(WDAY_NAMES[timeTimeInfo.tm_wday]).c_str(), timeTimeInfo.tm_mday, CleanText(MONTH_NAMES[timeTimeInfo.tm_mon]).c_str(), timeTimeInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("timeTimestamp: %s, %02d %s %04d "), CleanText(lang.WDAY_NAMES[timeTimeInfo.tm_wday]).c_str(), timeTimeInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeTimeInfo.tm_mon]).c_str(), timeTimeInfo.tm_year + 1900);
   }
   else
   {
-    Serial.printf_P(PSTR("timeTimestamp: %s, %02d/%02d/%04d "), CleanText(WDAY_NAMES[timeTimeInfo.tm_wday]).c_str(), timeTimeInfo.tm_mday, timeTimeInfo.tm_mon + 1, timeTimeInfo.tm_year + 1900);
+    Serial.printf_P(PSTR("timeTimestamp: %s, %02d/%02d/%04d "), CleanText(lang.WDAY_NAMES[timeTimeInfo.tm_wday]).c_str(), timeTimeInfo.tm_mday, timeTimeInfo.tm_mon + 1, timeTimeInfo.tm_year + 1900);
   }
   if (IS_24HOUR)
   {
@@ -553,7 +547,7 @@ void updateData(OLEDDisplay *display)
   Serial.println();
   delay(1000);
   readyForWeatherUpdate = false;
-  drawProgress(display, 100, CleanText(PROGRESS_TEXT[4]));
+  drawProgress(display, 100, CleanText(lang.PROGRESS_TEXT[4]));
   delay(250);
 }
 
@@ -562,7 +556,7 @@ void drawIPInfo(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int1
   display->setFont(ArialMT_Plain_16);
   display->setTextAlignment(TEXT_ALIGN_CENTER);
   display->drawString(64 + x, 5 + y, "IP");
-  display->drawString(64 + x, 25 + y, WiFi.localIP().toString());
+  display->drawStringMaxWidth(64 + x, 25 + y, 128, WiFi.localIP().toString());
 }
 
 void drawWifiInfo(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
@@ -571,19 +565,7 @@ void drawWifiInfo(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, in
   display->setTextAlignment(TEXT_ALIGN_CENTER);
   display->drawString(64 + x, 0 + y, "SSID");
   display->setFont(ArialMT_Plain_10);
-  display->drawString(64 + x, 20 + y, CleanText(SSID_String));
-  if (SYSTEM_LANG == "tr")
-  {
-    display->drawString(64 + x, 35 + y, "%" + String(getWifiQuality()));
-  }
-  else if (SYSTEM_LANG == "en")
-  {
-    display->drawString(64 + x, 35 + y, String(getWifiQuality()) + "%");
-  }
-  else
-  {
-    display->drawString(64 + x, 35 + y, String(getWifiQuality()) + "%");
-  }
+  display->drawStringMaxWidth(64 + x, 20 + y, 128, CleanText(SSID_String));
 }
 
 void drawDateTime(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
@@ -593,8 +575,6 @@ void drawDateTime(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, in
   tzset();
   struct tm timeInfo;
   localtime_r(&Display_Timestamp, &timeInfo);
-  struct tm timeInfoGMT;
-  gmtime_r(&Display_Timestamp, &timeInfoGMT);
 
   char buff[16];
   display->setTextAlignment(TEXT_ALIGN_CENTER);
@@ -615,11 +595,11 @@ void drawDateTime(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, in
 
   if (SHOW_MNAME)
   {
-    sprintf_P(buff, PSTR("%s, %02d %s %04d"), CleanText(WDAY_NAMES[timeInfo.tm_wday]).c_str(), timeInfo.tm_mday, CleanText(MONTH_NAMES[timeInfo.tm_mon]).c_str(), timeInfo.tm_year + 1900);
+    sprintf_P(buff, PSTR("%s, %02d %s %04d"), CleanText(lang.WDAY_NAMES[timeInfo.tm_wday]).c_str(), timeInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeInfo.tm_mon]).c_str(), timeInfo.tm_year + 1900);
   }
   else
   {
-    sprintf_P(buff, PSTR("%s, %02d/%02d/%04d"), CleanText(WDAY_NAMES[timeInfo.tm_wday]).c_str(), timeInfo.tm_mday, timeInfo.tm_mon + 1, timeInfo.tm_year + 1900);
+    sprintf_P(buff, PSTR("%s, %02d/%02d/%04d"), CleanText(lang.WDAY_NAMES[timeInfo.tm_wday]).c_str(), timeInfo.tm_mday, timeInfo.tm_mon + 1, timeInfo.tm_year + 1900);
   }
 
   display->drawString(64 + x, 0 + y, String(buff));
@@ -634,7 +614,7 @@ void drawDateTime(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, in
   Display_TZ_NAME_SHORT = tzname[isDST ? 1 : 0];
   display->drawString(0 + x, 38 + y, Display_TZ_NAME_SHORT);
 
-  Display_GMTOffset = timeInfo.tm_hour - timeInfoGMT.tm_hour;
+  Display_GMTOffset = currentWeather.timezone / 3600;
   (Display_GMTOffset >= 0) ? (sprintf_P(buff, PSTR("%s+%d"), "GMT", Display_GMTOffset)) : (sprintf_P(buff, PSTR("%s%d"), "GMT", Display_GMTOffset));
   display->drawString(90 + x, 38 + y, String(buff));
 }
@@ -652,9 +632,7 @@ void drawUntilToNextUpdate(OLEDDisplay *display, OLEDDisplayUiState *state, int1
   display->drawString(64 + x, 20 + y, String(buff));
 
   display->setFont(ArialMT_Plain_10);
-  display->drawString(64 + x, 0 + y, CleanText(TIME_UPDATE_TEXT[0]));
-
-  display->drawString(64 + x, 10 + y, CleanText(TIME_UPDATE_TEXT[1]));
+  display->drawStringMaxWidth(64 + x, 0 + y, 128, CleanText(lang.NEXT_UPDATE_TEXT));
 }
 
 void drawCity(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
@@ -693,7 +671,7 @@ void drawCurrentRoomTemp(OLEDDisplay *display, OLEDDisplayUiState *state, int16_
 {
   display->setFont(ArialMT_Plain_10);
   display->setTextAlignment(TEXT_ALIGN_CENTER);
-  display->drawString(64 + x, 38 + y, CleanText(INDOOR_TEMP_TEXT));
+  display->drawString(64 + x, 38 + y, CleanText(lang.INDOOR_TEMP_TEXT));
   display->setFont(ArialMT_Plain_24);
   String temp;
   if (IS_METRIC)
@@ -713,15 +691,15 @@ void drawCurrentRoomHum(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t
 {
   display->setFont(ArialMT_Plain_10);
   display->setTextAlignment(TEXT_ALIGN_CENTER);
-  display->drawString(64 + x, 38 + y, CleanText(INDOOR_HUM_TEXT));
+  display->drawString(64 + x, 38 + y, CleanText(lang.INDOOR_HUM_TEXT));
   display->setFont(ArialMT_Plain_24);
   float h = dht.readHumidity();
   String hum;
-  if (SYSTEM_LANG == "tr")
+  if (currentLang == "tr")
   {
     hum = ("%") + String(h, 0);
   }
-  else if (SYSTEM_LANG == "en")
+  else if (currentLang == "en")
   {
     hum = String(h, 0) + ("%");
   }
@@ -734,14 +712,15 @@ void drawCurrentRoomHum(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t
 
 void drawForecast(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
 {
-  drawForecastDetails(display, x + 10, y, 0);
-  drawForecastDetails(display, x + 70, y, 1);
+  drawForecastDetails(display, x, y, 0);
+  drawForecastDetails(display, x + 44, y, 1);
+  drawForecastDetails(display, x + 88, y, 2);
 }
 
 void drawForecast2(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
 {
-  drawForecastDetails(display, x + 10, y, 2);
-  drawForecastDetails(display, x + 70, y, 3);
+  drawForecastDetails(display, x + 10, y, 3);
+  drawForecastDetails(display, x + 70, y, 4);
 }
 
 void drawForecastDetails(OLEDDisplay *display, int x, int y, int dayIndex)
@@ -751,10 +730,11 @@ void drawForecastDetails(OLEDDisplay *display, int x, int y, int dayIndex)
   localtime_r(&observationTimestamp, &timeInfo);
   display->setTextAlignment(TEXT_ALIGN_CENTER);
   display->setFont(ArialMT_Plain_10);
-  display->drawString(x + 20, y, CleanText(WDAY_NAMES[timeInfo.tm_wday]));
+  display->drawString(x + 20, y, CleanText(lang.WDAY_NAMES[timeInfo.tm_wday]));
 
   display->setFont(Meteocons_Plain_21);
   display->drawString(x + 20, y + 12, forecasts[dayIndex].iconMeteoCon);
+
   String temp = String(forecasts[dayIndex].temp, 0) + (IS_METRIC ? "°C" : "°F");
   display->setFont(ArialMT_Plain_10);
   display->drawString(x + 20, y + 34, temp);
@@ -773,7 +753,7 @@ void drawWind(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_
 
   display->setFont(ArialMT_Plain_10);
   display->setTextAlignment(TEXT_ALIGN_CENTER);
-  display->drawString(90 + x, 38 + y, CleanText(WIND_DIRECTION_LONG[dirID]));
+  display->drawString(90 + x, 38 + y, CleanText(lang.WIND_DIRECTION_LONG[dirID]));
 
   if (dirID == 0)
   {
@@ -820,8 +800,8 @@ void drawAirQuality(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, 
 {
   display->setFont(ArialMT_Plain_10);
   display->setTextAlignment(TEXT_ALIGN_LEFT);
-  int aqiIndex = (currentAir.aqi) - 1;
-  display->drawString(62 + x, 14 + y, CleanText(AIR_QUALITY_TEXT[aqiIndex]));
+  uint8_t aqiIndex = (currentAir.aqi) - 1;
+  display->drawString(62 + x, 14 + y, CleanText(lang.AIR_QUALITY_TEXT[aqiIndex]));
   display->drawXbm(10 + x, 0 + y, 45, 45, weather_air_quality);
 }
 
@@ -829,9 +809,18 @@ void drawUVIndex(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int
 {
   display->setFont(ArialMT_Plain_10);
   display->setTextAlignment(TEXT_ALIGN_LEFT);
-  int uv_int = currentMeteo.uv_index;
-  display->drawString(62 + x, 14 + y, CleanText(UV_INDEX_TEXT[getUVindexText(uv_int)]));
+  uint8_t uv_int = currentMeteo.uv_index;
+  display->drawString(62 + x, 14 + y, CleanText(lang.UV_INDEX_TEXT[getUVindexText(uv_int)]));
   display->drawXbm(10 + x, 0 + y, 45, 45, weather_uv_index);
+}
+
+void drawPressure(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
+{
+  display->setFont(ArialMT_Plain_16);
+  display->setTextAlignment(TEXT_ALIGN_LEFT);
+  String pres = String(currentWeather.pressure) + " hPa";
+  display->drawStringMaxWidth(58 + x, 14 + y, 128, pres);
+  display->drawXbm(10 + x, 0 + y, 45, 45, weather_pressure);
 }
 
 void drawMoon(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t y)
@@ -847,11 +836,11 @@ void drawMoon(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_
 
   if (IS_24HOUR)
   {
-    sprintf_P(buff, PSTR("%s, %02d:%02d"), CleanText(WDAY_NAMES[timeMoonRiseInfo.tm_wday]), timeMoonRiseInfo.tm_hour, timeMoonRiseInfo.tm_min);
+    sprintf_P(buff, PSTR("%s, %02d:%02d"), CleanText(lang.WDAY_NAMES[timeMoonRiseInfo.tm_wday]), timeMoonRiseInfo.tm_hour, timeMoonRiseInfo.tm_min);
   }
   else
   {
-    sprintf_P(buff, PSTR("%s, %02d:%02d %s"), CleanText(WDAY_NAMES[timeMoonRiseInfo.tm_wday]), get12Hour(timeMoonRiseInfo.tm_hour), timeMoonRiseInfo.tm_min, getAMPM(timeMoonRiseInfo.tm_hour));
+    sprintf_P(buff, PSTR("%s, %02d:%02d %s"), CleanText(lang.WDAY_NAMES[timeMoonRiseInfo.tm_wday]), get12Hour(timeMoonRiseInfo.tm_hour), timeMoonRiseInfo.tm_min, getAMPM(timeMoonRiseInfo.tm_hour));
   }
 
   display->drawString(60 + x, 5 + y, String(buff));
@@ -863,18 +852,18 @@ void drawMoon(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_
 
   if (IS_24HOUR)
   {
-    sprintf_P(buff, PSTR("%s, %02d:%02d"), CleanText(WDAY_NAMES[timeMoonSetInfo.tm_wday]), timeMoonSetInfo.tm_hour, timeMoonSetInfo.tm_min);
+    sprintf_P(buff, PSTR("%s, %02d:%02d"), CleanText(lang.WDAY_NAMES[timeMoonSetInfo.tm_wday]), timeMoonSetInfo.tm_hour, timeMoonSetInfo.tm_min);
   }
   else
   {
-    sprintf_P(buff, PSTR("%s, %02d:%02d %s"), CleanText(WDAY_NAMES[timeMoonSetInfo.tm_wday]), get12Hour(timeMoonSetInfo.tm_hour), timeMoonSetInfo.tm_min, getAMPM(timeMoonSetInfo.tm_hour));
+    sprintf_P(buff, PSTR("%s, %02d:%02d %s"), CleanText(lang.WDAY_NAMES[timeMoonSetInfo.tm_wday]), get12Hour(timeMoonSetInfo.tm_hour), timeMoonSetInfo.tm_min, getAMPM(timeMoonSetInfo.tm_hour));
   }
 
   display->drawString(60 + x, 20 + y, String(buff));
 
   display->setFont(ArialMT_Plain_10);
   display->setTextAlignment(TEXT_ALIGN_CENTER);
-  display->drawString(64 + x, 38 + y, CleanText(SUN_MOON_TEXT[1]));
+  display->drawString(64 + x, 38 + y, CleanText(lang.SUN_MOON_TEXT[1]));
 
   display->setFont(Moon_Phases_Plain_36);
   display->setTextAlignment(TEXT_ALIGN_CENTER);
@@ -895,11 +884,11 @@ void drawSun(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t
 
   if (IS_24HOUR)
   {
-    sprintf_P(buff, PSTR("%s, %02d:%02d"), CleanText(WDAY_NAMES[timeRiseInfo.tm_wday]), timeRiseInfo.tm_hour, timeRiseInfo.tm_min);
+    sprintf_P(buff, PSTR("%s, %02d:%02d"), CleanText(lang.WDAY_NAMES[timeRiseInfo.tm_wday]), timeRiseInfo.tm_hour, timeRiseInfo.tm_min);
   }
   else
   {
-    sprintf_P(buff, PSTR("%s, %02d:%02d %s"), CleanText(WDAY_NAMES[timeRiseInfo.tm_wday]), get12Hour(timeRiseInfo.tm_hour), timeRiseInfo.tm_min, getAMPM(timeRiseInfo.tm_hour));
+    sprintf_P(buff, PSTR("%s, %02d:%02d %s"), CleanText(lang.WDAY_NAMES[timeRiseInfo.tm_wday]), get12Hour(timeRiseInfo.tm_hour), timeRiseInfo.tm_min, getAMPM(timeRiseInfo.tm_hour));
   }
 
   display->drawString(60 + x, 5 + y, String(buff));
@@ -912,11 +901,11 @@ void drawSun(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t
 
   if (IS_24HOUR)
   {
-    sprintf_P(buff, PSTR("%s, %02d:%02d"), CleanText(WDAY_NAMES[timeSetInfo.tm_wday]), timeSetInfo.tm_hour, timeSetInfo.tm_min);
+    sprintf_P(buff, PSTR("%s, %02d:%02d"), CleanText(lang.WDAY_NAMES[timeSetInfo.tm_wday]), timeSetInfo.tm_hour, timeSetInfo.tm_min);
   }
   else
   {
-    sprintf_P(buff, PSTR("%s, %02d:%02d %s"), CleanText(WDAY_NAMES[timeSetInfo.tm_wday]), get12Hour(timeSetInfo.tm_hour), timeSetInfo.tm_min, getAMPM(timeSetInfo.tm_hour));
+    sprintf_P(buff, PSTR("%s, %02d:%02d %s"), CleanText(lang.WDAY_NAMES[timeSetInfo.tm_wday]), get12Hour(timeSetInfo.tm_hour), timeSetInfo.tm_min, getAMPM(timeSetInfo.tm_hour));
   }
 
   display->drawString(60 + x, 20 + y, String(buff));
@@ -927,7 +916,7 @@ void drawSun(OLEDDisplay *display, OLEDDisplayUiState *state, int16_t x, int16_t
 
   display->setFont(ArialMT_Plain_10);
   display->setTextAlignment(TEXT_ALIGN_CENTER);
-  display->drawString(64 + x, 38 + y, CleanText(SUN_MOON_TEXT[0]));
+  display->drawString(64 + x, 38 + y, CleanText(lang.SUN_MOON_TEXT[0]));
 }
 
 void drawHeaderOverlay(OLEDDisplay *display, OLEDDisplayUiState *state)
@@ -957,7 +946,7 @@ void drawHeaderOverlay(OLEDDisplay *display, OLEDDisplayUiState *state)
 
   if (SHOW_MNAME)
   {
-    sprintf_P(buff, PSTR("%02d %s"), timeInfo.tm_mday, CleanText(MONTH_NAMES[timeInfo.tm_mon]).c_str());
+    sprintf_P(buff, PSTR("%02d %s"), timeInfo.tm_mday, CleanText(lang.MONTH_NAMES[timeInfo.tm_mon]).c_str());
   }
   else
   {
@@ -1087,7 +1076,7 @@ String getMoonPhasesIcon(uint8_t icon)
   return ")";
 }
 
-int getUVindexText(int index)
+uint8_t getUVindexText(uint8_t index)
 {
   // Low
   if (index > 0 && index < 3)
@@ -1120,7 +1109,7 @@ int getUVindexText(int index)
 
 void setReadyForWeatherUpdate()
 {
-  Serial.println(CleanText(LOG_TEXT[3]).c_str());
+  Serial.println(CleanText(lang.LOG_READY_FOR_UPDATE).c_str());
   readyForWeatherUpdate = true;
 }
 
@@ -1141,12 +1130,12 @@ void enableDisplay(bool enable)
   {
     display.displayOn();
     updateData(&display);
-    Serial.println(CleanText(LOG_TEXT[4]).c_str() + currentTime);
+    Serial.println(CleanText(lang.LOG_SCREEN_OPENED).c_str() + currentTime);
   }
   else
   {
     display.displayOff();
-    Serial.println(CleanText(LOG_TEXT[5]).c_str() + currentTime);
+    Serial.println(CleanText(lang.LOG_SCREEN_CLOSED).c_str() + currentTime);
   }
 }
 
@@ -1169,13 +1158,12 @@ void checkDisplay()
 
   if (currentTime == timeDisplayTurnsOn && !displayOn)
   {
-    Serial.println(CleanText(LOG_TEXT[6]).c_str() + currentTime);
+    Serial.println(CleanText(lang.LOG_SCREEN_OPEN_TIME).c_str() + currentTime);
     display.clear();
     display.display();
     display.setTextAlignment(TEXT_ALIGN_CENTER);
-    display.setFont(ArialMT_Plain_10);
-    display.drawString(64, 10, CleanText(NIGHT_MODE_TEXT[0]));
-    display.drawString(64, 30, CleanText(NIGHT_MODE_TEXT[2]));
+    display.setFont(ArialMT_Plain_16);
+    display.drawStringMaxWidth(64, 10, 128, CleanText(lang.NIGHT_MODE_FINISH_TEXT));
     display.display();
     delay(1000);
     enableDisplay(true);
@@ -1183,13 +1171,12 @@ void checkDisplay()
 
   if (currentTime == timeDisplayTurnsOff && displayOn)
   {
-    Serial.println(CleanText(LOG_TEXT[7]).c_str() + currentTime);
+    Serial.println(CleanText(lang.LOG_SCREEN_CLOSE_TIME).c_str() + currentTime);
     display.clear();
     display.display();
     display.setTextAlignment(TEXT_ALIGN_CENTER);
-    display.setFont(ArialMT_Plain_10);
-    display.drawString(64, 10, CleanText(NIGHT_MODE_TEXT[0]));
-    display.drawString(64, 30, CleanText(NIGHT_MODE_TEXT[1]));
+    display.setFont(ArialMT_Plain_16);
+    display.drawStringMaxWidth(64, 10, 128, CleanText(lang.NIGHT_MODE_START_TEXT));
     display.display();
     delay(1000);
     enableDisplay(false);
@@ -1201,7 +1188,7 @@ void loadDeviceSettings()
   if (LittleFS.exists(configName) == false)
   {
     Serial.println(configName);
-    Serial.println(CleanText(LOG_TEXT[14]).c_str());
+    Serial.println(CleanText(lang.LOG_FILE_NOT_FOUND).c_str());
     Serial.println();
     saveDeviceSettings();
     return;
@@ -1298,6 +1285,10 @@ void loadDeviceSettings()
     {
       IS_METRIC = (value == "1" || value == "true");
     }
+    if (key == "currentLang")
+    {
+      currentLang = value;
+    }
   }
 
   f.close();
@@ -1308,11 +1299,11 @@ void saveDeviceSettings()
   File f = LittleFS.open(configName, "w");
   if (!f)
   {
-    Serial.println((CleanText(LOG_TEXT[26]).c_str()));
+    Serial.println((CleanText(lang.LOG_FILE_OPEN_FAIL).c_str()));
   }
   else
   {
-    Serial.println((CleanText(LOG_TEXT[27]).c_str()));
+    Serial.println((CleanText(lang.LOG_SAVING_SETTINGS).c_str()));
     f.println(F("Display_GMTOffset=") + String(Display_GMTOffset));
     f.println(F("Display_TZ_NAME=") + Display_TZ_NAME);
     f.println(F("Display_TZ_POSIX=") + Display_TZ_POSIX);
@@ -1323,6 +1314,7 @@ void saveDeviceSettings()
     f.println(F("Display_City_Name=") + Display_City_Name);
     f.println(F("Display_Country_Name=") + Display_Country_Name);
     f.println(F("IS_METRIC=") + String(IS_METRIC));
+    f.println(F("currentLang=") + currentLang);
   }
   f.close();
 
@@ -1334,7 +1326,7 @@ void loadSecuritySettings()
   if (LittleFS.exists(securityConfig) == false)
   {
     Serial.println(securityConfig);
-    Serial.println(CleanText(LOG_TEXT[14]).c_str());
+    Serial.println(CleanText(lang.LOG_FILE_NOT_FOUND).c_str());
     Serial.println();
     saveSecuritySettings();
     return;
@@ -1409,11 +1401,11 @@ void saveSecuritySettings()
   File f = LittleFS.open(securityConfig, "w");
   if (!f)
   {
-    Serial.println((CleanText(LOG_TEXT[26]).c_str()));
+    Serial.println((CleanText(lang.LOG_FILE_OPEN_FAIL).c_str()));
   }
   else
   {
-    Serial.println((CleanText(LOG_TEXT[27]).c_str()));
+    Serial.println((CleanText(lang.LOG_SAVING_SETTINGS).c_str()));
     f.println(F("SysUser=") + SysUser);
     f.println(F("SysPass=") + SysPass);
   }
@@ -1427,7 +1419,7 @@ void loadDisplaySettings()
   if (LittleFS.exists(displayConfig) == false)
   {
     Serial.println(displayConfig);
-    Serial.println(CleanText(LOG_TEXT[14]).c_str());
+    Serial.println(CleanText(lang.LOG_FILE_NOT_FOUND).c_str());
     Serial.println();
     saveDisplaySettings();
     return;
@@ -1518,11 +1510,11 @@ void saveDisplaySettings()
   File f = LittleFS.open(displayConfig, "w");
   if (!f)
   {
-    Serial.println((CleanText(LOG_TEXT[26]).c_str()));
+    Serial.println((CleanText(lang.LOG_FILE_OPEN_FAIL).c_str()));
   }
   else
   {
-    Serial.println((CleanText(LOG_TEXT[27]).c_str()));
+    Serial.println((CleanText(lang.LOG_SAVING_SETTINGS).c_str()));
     f.println(F("IS_24HOUR=") + String(IS_24HOUR));
     f.println(F("SHOW_MNAME=") + String(SHOW_MNAME));
     f.println(F("Disp_Contrast=") + String(Disp_Contrast));
@@ -1540,7 +1532,7 @@ void loadApiKeySettings()
   if (LittleFS.exists(ApiKeyConfig) == false)
   {
     Serial.println(ApiKeyConfig);
-    Serial.println(CleanText(LOG_TEXT[14]).c_str());
+    Serial.println(CleanText(lang.LOG_FILE_NOT_FOUND).c_str());
     Serial.println();
     saveApiKeySettings();
     return;
@@ -1615,17 +1607,35 @@ void saveApiKeySettings()
   File f = LittleFS.open(ApiKeyConfig, "w");
   if (!f)
   {
-    Serial.println((CleanText(LOG_TEXT[26]).c_str()));
+    Serial.println((CleanText(lang.LOG_FILE_OPEN_FAIL).c_str()));
   }
   else
   {
-    Serial.println((CleanText(LOG_TEXT[27]).c_str()));
+    Serial.println((CleanText(lang.LOG_SAVING_SETTINGS).c_str()));
     f.println(F("OPEN_WEATHER_MAP_KEY=") + OPEN_WEATHER_MAP_KEY);
     f.println(F("OPEN_CAGE_KEY=") + OPEN_CAGE_KEY);
   }
   f.close();
 
   loadApiKeySettings();
+}
+
+void applyLanguage()
+{
+  const LanguagePack *selected;
+  if (currentLang == "tr")
+  {
+    selected = &LANG_TR;
+  }
+  else if (currentLang == "en")
+  {
+    selected = &LANG_EN;
+  }
+  else
+  {
+    selected = &LANG_EN;
+  }
+  lang = *selected;
 }
 
 void removeAllConfigs()
@@ -1646,24 +1656,24 @@ void loadAllConfigs()
 
 void configModeCallback(WiFiManager *myWiFiManager)
 {
-  Serial.println(CleanText(LOG_TEXT[9]).c_str());
+  Serial.println(CleanText(lang.LOG_ENTER_CONFIG_MODE).c_str());
   Serial.println(WiFi.softAPIP());
 
   display.clear();
   display.setTextAlignment(TEXT_ALIGN_CENTER);
   display.setFont(ArialMT_Plain_10);
   display.drawString(64, 0, "WiFiManager");
-  display.drawString(64, 10, CleanText(LOG_TEXT[10]));
+  display.drawString(64, 10, CleanText(lang.LOG_CONNECT_TO_AP));
   display.setFont(ArialMT_Plain_16);
   display.drawString(64, 26, myWiFiManager->getConfigPortalSSID());
   display.setFont(ArialMT_Plain_10);
-  display.drawString(64, 46, CleanText(LOG_TEXT[11]));
+  display.drawString(64, 46, CleanText(lang.LOG_WIFI_SETUP));
   display.display();
 
   Serial.println(F("WiFiManager"));
-  Serial.println(CleanText(LOG_TEXT[10]).c_str());
+  Serial.println(CleanText(lang.LOG_CONNECT_TO_AP).c_str());
   Serial.println(myWiFiManager->getConfigPortalSSID());
-  Serial.println(CleanText(LOG_TEXT[11]).c_str());
+  Serial.println(CleanText(lang.LOG_WIFI_SETUP).c_str());
 }
 
 void redirectHome()
@@ -1690,51 +1700,53 @@ void handleDevicePage()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(Device_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%DEVICESETTINGS%", HTML_TEXT[1]);
-  html.replace("%CITYTEXT%", HTML_TEXT[7]);
-  html.replace("%CITYPLACE%", HTML_TEXT[8]);
-  html.replace("%COUNTRYTEXT%", HTML_TEXT[9]);
-  html.replace("%COUNTRYPLACE%", HTML_TEXT[10]);
-  html.replace("%FINDGEOTIME%", HTML_TEXT[11]);
-  html.replace("%LATTEXT%", HTML_TEXT[12]);
-  html.replace("%LATPLACE%", HTML_TEXT[13]);
-  html.replace("%LONTEXT%", HTML_TEXT[14]);
-  html.replace("%LONPLACE%", HTML_TEXT[15]);
-  html.replace("%TZNAMETEXT%", HTML_TEXT[16]);
-  html.replace("%UNITTEXT%", HTML_TEXT[17]);
-  html.replace("%METRICTEXT%", HTML_TEXT[18]);
-  html.replace("%IMPERIALTEXT%", HTML_TEXT[19]);
-  html.replace("%INTERVALTEXT%", HTML_TEXT[20]);
-  html.replace("%SAVETEXT%", HTML_TEXT[21]);
-  html.replace("%HOMETEXT%", HTML_TEXT[22]);
-  html.replace("%GEOALERT%", HTML_TEXT[23]);
-  html.replace("%GEOALERT2%", HTML_TEXT[24]);
-  html.replace("%GEOALERT3%", HTML_TEXT[25]);
-  html.replace("%FORMSENDING%", HTML_TEXT[44]);
-  html.replace("%TZALERT1%", HTML_TEXT[49]);
-  html.replace("%TZALERT2%", HTML_TEXT[50]);
-  html.replace("%TZALERT3%", HTML_TEXT[51]);
-  html.replace("%APIKEYSETTINGS%", HTML_TEXT[47]);
-  html.replace("%DISPLAYSETTINGS%", HTML_TEXT[45]);
-  html.replace("%SECURITYSETTINGS%", HTML_TEXT[2]);
-  html.replace("%WORLDCLOCKSETTINGS%", HTML_TEXT[62]);
-  html.replace("%ABOUTTEXT%", HTML_TEXT[26]);
-  html.replace("%OTATEXT%", HTML_TEXT[36]);
-  html.replace("%SHOWMAPTEXT%", HTML_TEXT[61]);
-  html.replace("%TZNAME%", Display_TZ_NAME);
-  html.replace("%LAT%", String(OPEN_WEATHER_MAP_LOCATION_LAT, 7));
-  html.replace("%LON%", String(OPEN_WEATHER_MAP_LOCATION_LON, 7));
-  html.replace("%CITY%", Display_City_Name);
-  html.replace("%COUNTRY%", Display_Country_Name);
-  html.replace("%GEOAPIKEY%", OPEN_CAGE_KEY);
-  html.replace("%METRIC%", IS_METRIC ? "selected" : "");
-  html.replace("%IMPERIAL%", !IS_METRIC ? "selected" : "");
-  html.replace("%UP10%", (UPDATE_INTERVAL == 10) ? "selected" : "");
-  html.replace("%UP15%", (UPDATE_INTERVAL == 15) ? "selected" : "");
-  html.replace("%UP20%", (UPDATE_INTERVAL == 20) ? "selected" : "");
-  html.replace("%UP30%", (UPDATE_INTERVAL == 30) ? "selected" : "");
-  html.replace("%UP60%", (UPDATE_INTERVAL == 60) ? "selected" : "");
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%DEVICESETTINGS%"), lang.HTML_TEXT_DEVICE_SETTINGS);
+  html.replace(F("%CITYTEXT%"), lang.HTML_TEXT_CITY_NAME);
+  html.replace(F("%CITYPLACE%"), lang.HTML_TEXT_CITY_EXAMPLE);
+  html.replace(F("%COUNTRYTEXT%"), lang.HTML_TEXT_COUNTRY_NAME);
+  html.replace(F("%COUNTRYPLACE%"), lang.HTML_TEXT_COUNTRY_EXAMPLE);
+  html.replace(F("%FINDGEOTIME%"), lang.HTML_TEXT_FIND_LOCATION);
+  html.replace(F("%LATTEXT%"), lang.HTML_TEXT_LATITUDE);
+  html.replace(F("%LATPLACE%"), lang.HTML_TEXT_LATITUDE_EXAMPLE);
+  html.replace(F("%LONTEXT%"), lang.HTML_TEXT_LONGITUDE);
+  html.replace(F("%LONPLACE%"), lang.HTML_TEXT_LONGITUDE_EXAMPLE);
+  html.replace(F("%TZNAMETEXT%"), lang.HTML_TEXT_TIMEZONE);
+  html.replace(F("%UNITTEXT%"), lang.HTML_TEXT_UNIT_SELECT);
+  html.replace(F("%METRICTEXT%"), lang.HTML_TEXT_UNIT_METRIC);
+  html.replace(F("%IMPERIALTEXT%"), lang.HTML_TEXT_UNIT_IMPERIAL);
+  html.replace(F("%INTERVALTEXT%"), lang.HTML_TEXT_UPDATE_INTERVAL);
+  html.replace(F("%SAVETEXT%"), lang.HTML_TEXT_SAVE);
+  html.replace(F("%HOMETEXT%"), lang.HTML_TEXT_HOME);
+  html.replace(F("%GEOALERT%"), lang.HTML_TEXT_MISSING_INPUT);
+  html.replace(F("%GEOALERT2%"), lang.HTML_TEXT_LOCATION_NOT_FOUND);
+  html.replace(F("%GEOALERT3%"), lang.HTML_TEXT_API_FAIL);
+  html.replace(F("%FORMSENDING%"), lang.HTML_TEXT_SAVING);
+  html.replace(F("%TZALERT1%"), lang.HTML_TEXT_TZ_NOT_FOUND);
+  html.replace(F("%TZALERT2%"), lang.HTML_TEXT_TZ_FETCH_FAIL);
+  html.replace(F("%TZALERT3%"), lang.HTML_TEXT_TZ_LOAD_FAIL);
+  html.replace(F("%APIKEYSETTINGS%"), lang.HTML_TEXT_API_SETTINGS);
+  html.replace(F("%DISPLAYSETTINGS%"), lang.HTML_TEXT_DISPLAY_SETTINGS);
+  html.replace(F("%SECURITYSETTINGS%"), lang.HTML_TEXT_SECURITY_SETTINGS);
+  html.replace(F("%ABOUTTEXT%"), lang.HTML_TEXT_ABOUT);
+  html.replace(F("%OTATEXT%"), lang.HTML_TEXT_OTA_UPDATE);
+  html.replace(F("%SHOWMAPTEXT%"), lang.HTML_TEXT_SHOW_ON_MAP);
+  html.replace(F("%SYSLANG%"), lang.HTML_SYSTEM_LANG);
+  html.replace(F("%TZNAME%"), Display_TZ_NAME);
+  html.replace(F("%LAT%"), String(OPEN_WEATHER_MAP_LOCATION_LAT, 7));
+  html.replace(F("%LON%"), String(OPEN_WEATHER_MAP_LOCATION_LON, 7));
+  html.replace(F("%CITY%"), Display_City_Name);
+  html.replace(F("%COUNTRY%"), Display_Country_Name);
+  html.replace(F("%GEOAPIKEY%"), OPEN_CAGE_KEY);
+  html.replace(F("%METRIC%"), IS_METRIC ? "selected" : "");
+  html.replace(F("%IMPERIAL%"), !IS_METRIC ? "selected" : "");
+  html.replace(F("%UP10%"), (UPDATE_INTERVAL == 10) ? "selected" : "");
+  html.replace(F("%UP15%"), (UPDATE_INTERVAL == 15) ? "selected" : "");
+  html.replace(F("%UP20%"), (UPDATE_INTERVAL == 20) ? "selected" : "");
+  html.replace(F("%UP30%"), (UPDATE_INTERVAL == 30) ? "selected" : "");
+  html.replace(F("%UP60%"), (UPDATE_INTERVAL == 60) ? "selected" : "");
+  html.replace(F("%LANGTR%"), (currentLang == "tr") ? "selected" : "");
+  html.replace(F("%LANGEN%"), (currentLang == "en") ? "selected" : "");
   server.sendContent(html);
 
   server.client().stop();
@@ -1774,7 +1786,7 @@ void handleSaveDevice()
 
     if (val.startsWith("up"))
     {
-      int interval = val.substring(2).toInt(); // "up10" → "10" → int(10)
+      uint8_t interval = val.substring(2).toInt(); // "up10" → "10" → int(10)
 
       if (interval == 10 || interval == 15 || interval == 20 || interval == 30 || interval == 60)
       {
@@ -1795,10 +1807,27 @@ void handleSaveDevice()
     Display_TZ_NAME = val;
   }
 
+  if (server.hasArg("sysLang"))
+  {
+    String val = server.arg("sysLang");
+
+    if (val.startsWith("lang-"))
+    {
+      String langs = val.substring(5); // "lang-en" → "en"
+
+      if (langs == "tr" || langs == "en")
+      {
+        currentLang = langs;
+      }
+    }
+    applyLanguage();
+  }
+
   UPDATE_INTERVAL_SECS = UPDATE_INTERVAL * 60;
 
   Serial.println();
-  Serial.println(CleanText(LOG_TEXT[12]).c_str());
+  Serial.println(CleanText(lang.LOG_DEVICE_SETTINGS_UPDATED).c_str());
+  Serial.printf_P(PSTR("currentLang: %s\n"), currentLang.c_str());
   Serial.printf_P(PSTR("Display_TZ_NAME: %s\n"), Display_TZ_NAME.c_str());
   Serial.printf_P(PSTR("Display_TZ_POSIX: %s\n"), Display_TZ_POSIX.c_str());
   Serial.printf_P(PSTR("OPEN_WEATHER_MAP_LOCATION_LAT: %f\n"), OPEN_WEATHER_MAP_LOCATION_LAT);
@@ -1818,9 +1847,9 @@ void handleSaveDevice()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(Save_Settings_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%DEVICESETTINGS%", HTML_TEXT[1]);
-  html.replace("%DEVICETEXT%", HTML_TEXT[40]);
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%DEVICESETTINGS%"), lang.HTML_TEXT_DEVICE_SETTINGS);
+  html.replace(F("%DEVICETEXT%"), lang.HTML_TEXT_DEVICE_SAVED);
   server.sendContent(html);
 
   checkDisplay();
@@ -1841,26 +1870,25 @@ void handleApiKeyPage()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(ApiKey_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%APIKEYSETTINGS%", HTML_TEXT[47]);
-  html.replace("%OWMAPIKEYTEXT%", HTML_TEXT[3]);
-  html.replace("%APIPLACE%", HTML_TEXT[4]);
-  html.replace("%SHOWPASS%", HTML_TEXT[5]);
-  html.replace("%GEOAPIKEYTEXT%", HTML_TEXT[6]);
-  html.replace("%SAVETEXT%", HTML_TEXT[21]);
-  html.replace("%HIDEPASS%", HTML_TEXT[35]);
-  html.replace("%GETFROMTEXT%", HTML_TEXT[41]);
-  html.replace("%HERETEXT%", HTML_TEXT[42]);
-  html.replace("%FORMSENDING%", HTML_TEXT[44]);
-  html.replace("%HOMETEXT%", HTML_TEXT[22]);
-  html.replace("%DEVICESETTINGS%", HTML_TEXT[1]);
-  html.replace("%DISPLAYSETTINGS%", HTML_TEXT[45]);
-  html.replace("%SECURITYSETTINGS%", HTML_TEXT[2]);
-  html.replace("%WORLDCLOCKSETTINGS%", HTML_TEXT[62]);
-  html.replace("%OTATEXT%", HTML_TEXT[36]);
-  html.replace("%ABOUTTEXT%", HTML_TEXT[26]);
-  html.replace("%OWMAPIKEY%", OPEN_WEATHER_MAP_KEY);
-  html.replace("%GEOAPIKEY%", OPEN_CAGE_KEY);
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%APIKEYSETTINGS%"), lang.HTML_TEXT_API_SETTINGS);
+  html.replace(F("%OWMAPIKEYTEXT%"), lang.HTML_TEXT_OWM_API_KEY);
+  html.replace(F("%APIPLACE%"), lang.HTML_TEXT_ENTER_API_KEY);
+  html.replace(F("%SHOWPASS%"), lang.HTML_TEXT_SHOW);
+  html.replace(F("%GEOAPIKEYTEXT%"), lang.HTML_TEXT_OC_API_KEY);
+  html.replace(F("%SAVETEXT%"), lang.HTML_TEXT_SAVE);
+  html.replace(F("%HIDEPASS%"), lang.HTML_TEXT_HIDE);
+  html.replace(F("%GETFROMTEXT%"), lang.HTML_TEXT_FROM_HERE);
+  html.replace(F("%HERETEXT%"), lang.HTML_TEXT_GET);
+  html.replace(F("%FORMSENDING%"), lang.HTML_TEXT_SAVING);
+  html.replace(F("%HOMETEXT%"), lang.HTML_TEXT_HOME);
+  html.replace(F("%DEVICESETTINGS%"), lang.HTML_TEXT_DEVICE_SETTINGS);
+  html.replace(F("%DISPLAYSETTINGS%"), lang.HTML_TEXT_DISPLAY_SETTINGS);
+  html.replace(F("%SECURITYSETTINGS%"), lang.HTML_TEXT_SECURITY_SETTINGS);
+  html.replace(F("%OTATEXT%"), lang.HTML_TEXT_OTA_UPDATE);
+  html.replace(F("%ABOUTTEXT%"), lang.HTML_TEXT_ABOUT);
+  html.replace(F("%OWMAPIKEY%"), OPEN_WEATHER_MAP_KEY);
+  html.replace(F("%GEOAPIKEY%"), OPEN_CAGE_KEY);
   server.sendContent(html);
 
   server.client().stop();
@@ -1880,7 +1908,7 @@ void handleSaveApiKey()
   }
 
   Serial.println();
-  Serial.println(CleanText(LOG_TEXT[21]).c_str());
+  Serial.println(CleanText(lang.LOG_API_KEYS_UPDATED).c_str());
   Serial.printf_P(PSTR("OPEN_WEATHER_MAP_APP_ID: %s\n"), OPEN_WEATHER_MAP_KEY.c_str());
   Serial.printf_P(PSTR("OPEN_CAGE_ID: %s\n"), OPEN_CAGE_KEY.c_str());
   Serial.println();
@@ -1894,9 +1922,9 @@ void handleSaveApiKey()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(Save_ApiKey_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%APIKEYSETTINGS%", HTML_TEXT[47]);
-  html.replace("%APIKEYTEXT%", HTML_TEXT[48]);
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%APIKEYSETTINGS%"), lang.HTML_TEXT_API_SETTINGS);
+  html.replace(F("%APIKEYTEXT%"), lang.HTML_TEXT_API_SAVED);
   server.sendContent(html);
 
   checkDisplay();
@@ -1913,19 +1941,18 @@ void handleHomePage()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(Home_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%HOMETITLE%", HTML_TEXT[0]);
-  html.replace("%DEVICESETTINGS%", HTML_TEXT[1]);
-  html.replace("%SECURITYSETTINGS%", HTML_TEXT[2]);
-  html.replace("%WORLDCLOCKSETTINGS%", HTML_TEXT[62]);
-  html.replace("%DEFAULTSETTINGS%", HTML_TEXT[33]);
-  html.replace("%DEFAULTALERT%", HTML_TEXT[34]);
-  html.replace("%OTATEXT%", HTML_TEXT[36]);
-  html.replace("%DISPLAYSETTINGS%", HTML_TEXT[45]);
-  html.replace("%APIKEYSETTINGS%", HTML_TEXT[47]);
-  html.replace("%ABOUTTEXT%", HTML_TEXT[26]);
-  html.replace("%UPDATEDATATEXT%", HTML_TEXT[54]);
-  html.replace("%VERSION%", "V" + String(VERSION));
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%HOMETITLE%"), lang.HTML_TEXT_TITLE);
+  html.replace(F("%DEVICESETTINGS%"), lang.HTML_TEXT_DEVICE_SETTINGS);
+  html.replace(F("%SECURITYSETTINGS%"), lang.HTML_TEXT_SECURITY_SETTINGS);
+  html.replace(F("%DEFAULTSETTINGS%"), lang.HTML_TEXT_DEFAULT_RESET);
+  html.replace(F("%DEFAULTALERT%"), lang.HTML_TEXT_DEFAULT_CONFIRM);
+  html.replace(F("%OTATEXT%"), lang.HTML_TEXT_OTA_UPDATE);
+  html.replace(F("%DISPLAYSETTINGS%"), lang.HTML_TEXT_DISPLAY_SETTINGS);
+  html.replace(F("%APIKEYSETTINGS%"), lang.HTML_TEXT_API_SETTINGS);
+  html.replace(F("%ABOUTTEXT%"), lang.HTML_TEXT_ABOUT);
+  html.replace(F("%UPDATEDATATEXT%"), lang.HTML_TEXT_REFRESH_DATA);
+  html.replace(F("%VERSION%"), "V" + String(VERSION));
   server.sendContent(html);
 
   server.client().stop();
@@ -1945,24 +1972,23 @@ void handleSecurityPage()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(Security_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%SECURITYSETTINGS%", HTML_TEXT[2]);
-  html.replace("%SHOWPASS%", HTML_TEXT[5]);
-  html.replace("%SAVETEXT%", HTML_TEXT[21]);
-  html.replace("%PASSWORDTEXT%", HTML_TEXT[27]);
-  html.replace("%USERTEXT%", HTML_TEXT[28]);
-  html.replace("%USERPLACE%", HTML_TEXT[29]);
-  html.replace("%PASSWORDPLACE2%", HTML_TEXT[30]);
-  html.replace("%HIDEPASS%", HTML_TEXT[35]);
-  html.replace("%HOMETEXT%", HTML_TEXT[22]);
-  html.replace("%DEVICESETTINGS%", HTML_TEXT[1]);
-  html.replace("%APIKEYSETTINGS%", HTML_TEXT[47]);
-  html.replace("%DISPLAYSETTINGS%", HTML_TEXT[45]);
-  html.replace("%WORLDCLOCKSETTINGS%", HTML_TEXT[62]);
-  html.replace("%OTATEXT%", HTML_TEXT[36]);
-  html.replace("%ABOUTTEXT%", HTML_TEXT[26]);
-  html.replace("%USER%", SysUser);
-  html.replace("%PASSWORD%", SysPass);
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%SECURITYSETTINGS%"), lang.HTML_TEXT_SECURITY_SETTINGS);
+  html.replace(F("%SHOWPASS%"), lang.HTML_TEXT_SHOW);
+  html.replace(F("%SAVETEXT%"), lang.HTML_TEXT_SAVE);
+  html.replace(F("%PASSWORDTEXT%"), lang.HTML_TEXT_PASSWORD);
+  html.replace(F("%USERTEXT%"), lang.HTML_TEXT_USERNAME);
+  html.replace(F("%USERPLACE%"), lang.HTML_TEXT_ENTER_USERNAME);
+  html.replace(F("%PASSWORDPLACE2%"), lang.HTML_TEXT_ENTER_PASSWORD);
+  html.replace(F("%HIDEPASS%"), lang.HTML_TEXT_HIDE);
+  html.replace(F("%HOMETEXT%"), lang.HTML_TEXT_HOME);
+  html.replace(F("%DEVICESETTINGS%"), lang.HTML_TEXT_DEVICE_SETTINGS);
+  html.replace(F("%APIKEYSETTINGS%"), lang.HTML_TEXT_API_SETTINGS);
+  html.replace(F("%DISPLAYSETTINGS%"), lang.HTML_TEXT_DISPLAY_SETTINGS);
+  html.replace(F("%OTATEXT%"), lang.HTML_TEXT_OTA_UPDATE);
+  html.replace(F("%ABOUTTEXT%"), lang.HTML_TEXT_ABOUT);
+  html.replace(F("%USER%"), SysUser);
+  html.replace(F("%PASSWORD%"), SysPass);
   server.sendContent(html);
 
   server.client().stop();
@@ -1980,7 +2006,7 @@ void handleSaveSecurity()
     SysPass = server.arg("password");
   }
 
-  Serial.println(CleanText(LOG_TEXT[13]).c_str());
+  Serial.println(CleanText(lang.LOG_SECURITY_SETTINGS_UPDATED).c_str());
   Serial.printf_P(PSTR("SysUser: %s\n"), SysUser.c_str());
   Serial.printf_P(PSTR("SysPass: %s\n"), SysPass.c_str());
 
@@ -1993,9 +2019,9 @@ void handleSaveSecurity()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(Save_Security_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%SECURITYSETTINGS%", HTML_TEXT[2]);
-  html.replace("%SECURITYTEXT%", HTML_TEXT[64]);
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%SECURITYSETTINGS%"), lang.HTML_TEXT_SECURITY_SETTINGS);
+  html.replace(F("%SECURITYTEXT%"), lang.HTML_TEXT_SECURITY_SAVED);
   server.sendContent(html);
 
   checkDisplay();
@@ -2015,36 +2041,35 @@ void handleDisplayPage()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(Display_Settings_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%SAVETEXT%", HTML_TEXT[21]);
-  html.replace("%TIMEONTEXT%", HTML_TEXT[37]);
-  html.replace("%TIMEOFFTEXT%", HTML_TEXT[38]);
-  html.replace("%INVDISPTEXT%", HTML_TEXT[43]);
-  html.replace("%FORMSENDING%", HTML_TEXT[44]);
-  html.replace("%DISPLAYSETTINGS%", HTML_TEXT[45]);
-  html.replace("%DISPLAYCONTRAST%", HTML_TEXT[52]);
-  html.replace("%HOURTEXT%", HTML_TEXT[53]);
-  html.replace("%HOUR24TEXT%", HTML_TEXT[55]);
-  html.replace("%HOUR12TEXT%", HTML_TEXT[56]);
-  html.replace("%MONTHTEXT%", HTML_TEXT[57]);
-  html.replace("%ASNUMBERTEXT%", HTML_TEXT[58]);
-  html.replace("%ASNAMETEXT%", HTML_TEXT[59]);
-  html.replace("%TIMEWARNINGTEXT%", HTML_TEXT[60]);
-  html.replace("%HOMETEXT%", HTML_TEXT[22]);
-  html.replace("%DEVICESETTINGS%", HTML_TEXT[1]);
-  html.replace("%APIKEYSETTINGS%", HTML_TEXT[47]);
-  html.replace("%SECURITYSETTINGS%", HTML_TEXT[2]);
-  html.replace("%WORLDCLOCKSETTINGS%", HTML_TEXT[62]);
-  html.replace("%OTATEXT%", HTML_TEXT[36]);
-  html.replace("%ABOUTTEXT%", HTML_TEXT[26]);
-  html.replace("%TIMEON%", timeDisplayTurnsOn);
-  html.replace("%TIMEOFF%", timeDisplayTurnsOff);
-  html.replace("%SETCONTRAST%", String(Disp_Contrast));
-  html.replace("%IS_INVDISP_CHECKED%", INVERT_DISPLAY ? "checked" : "");
-  html.replace("%HOUR24%", IS_24HOUR ? "selected" : "");
-  html.replace("%HOUR12%", !IS_24HOUR ? "selected" : "");
-  html.replace("%ASNUMBER%", !SHOW_MNAME ? "selected" : "");
-  html.replace("%ASNAME%", SHOW_MNAME ? "selected" : "");
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%SAVETEXT%"), lang.HTML_TEXT_SAVE);
+  html.replace(F("%TIMEONTEXT%"), lang.HTML_TEXT_ON_TIME);
+  html.replace(F("%TIMEOFFTEXT%"), lang.HTML_TEXT_OFF_TIME);
+  html.replace(F("%INVDISPTEXT%"), lang.HTML_TEXT_ROTATE_DISPLAY);
+  html.replace(F("%FORMSENDING%"), lang.HTML_TEXT_SAVING);
+  html.replace(F("%DISPLAYSETTINGS%"), lang.HTML_TEXT_DISPLAY_SETTINGS);
+  html.replace(F("%DISPLAYCONTRAST%"), lang.HTML_TEXT_BRIGHTNESS);
+  html.replace(F("%HOURTEXT%"), lang.HTML_TEXT_TIME_FORMAT);
+  html.replace(F("%HOUR24TEXT%"), lang.HTML_TEXT_24H);
+  html.replace(F("%HOUR12TEXT%"), lang.HTML_TEXT_12H);
+  html.replace(F("%MONTHTEXT%"), lang.HTML_TEXT_MONTH_FORMAT);
+  html.replace(F("%ASNUMBERTEXT%"), lang.HTML_TEXT_MONTH_NUMERIC);
+  html.replace(F("%ASNAMETEXT%"), lang.HTML_TEXT_MONTH_TEXT);
+  html.replace(F("%TIMEWARNINGTEXT%"), lang.HTML_TEXT_ENTER_TIME);
+  html.replace(F("%HOMETEXT%"), lang.HTML_TEXT_HOME);
+  html.replace(F("%DEVICESETTINGS%"), lang.HTML_TEXT_DEVICE_SETTINGS);
+  html.replace(F("%APIKEYSETTINGS%"), lang.HTML_TEXT_API_SETTINGS);
+  html.replace(F("%SECURITYSETTINGS%"), lang.HTML_TEXT_SECURITY_SETTINGS);
+  html.replace(F("%OTATEXT%"), lang.HTML_TEXT_OTA_UPDATE);
+  html.replace(F("%ABOUTTEXT%"), lang.HTML_TEXT_ABOUT);
+  html.replace(F("%TIMEON%"), timeDisplayTurnsOn);
+  html.replace(F("%TIMEOFF%"), timeDisplayTurnsOff);
+  html.replace(F("%SETCONTRAST%"), String(Disp_Contrast));
+  html.replace(F("%IS_INVDISP_CHECKED%"), INVERT_DISPLAY ? "checked" : "");
+  html.replace(F("%HOUR24%"), IS_24HOUR ? "selected" : "");
+  html.replace(F("%HOUR12%"), !IS_24HOUR ? "selected" : "");
+  html.replace(F("%ASNUMBER%"), !SHOW_MNAME ? "selected" : "");
+  html.replace(F("%ASNAME%"), SHOW_MNAME ? "selected" : "");
   server.sendContent(html);
 
   server.client().stop();
@@ -2053,7 +2078,7 @@ void handleDisplayPage()
 void handleSaveDisplay()
 {
   bool flipOld = INVERT_DISPLAY;
-  int conOld = Disp_Contrast;
+  uint8_t conOld = Disp_Contrast;
 
   if (server.hasArg("turnOffTime"))
   {
@@ -2085,7 +2110,7 @@ void handleSaveDisplay()
   INVERT_DISPLAY = server.hasArg("invDisp");
 
   Serial.println();
-  Serial.println(CleanText(LOG_TEXT[24]).c_str());
+  Serial.println(CleanText(lang.LOG_DISPLAY_SETTINGS_UPDATED).c_str());
   Serial.printf_P(PSTR("INVERT_DISPLAY: %s\n"), INVERT_DISPLAY ? "true" : "false");
   Serial.printf_P(PSTR("timeDisplayTurnsOn: %s\n"), timeDisplayTurnsOn.c_str());
   Serial.printf_P(PSTR("timeDisplayTurnsOff: %s\n"), timeDisplayTurnsOff.c_str());
@@ -2103,9 +2128,9 @@ void handleSaveDisplay()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(Save_Display_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%DISPLAYSETTINGS%", HTML_TEXT[45]);
-  html.replace("%DISPLAYTEXT%", HTML_TEXT[46]);
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%DISPLAYSETTINGS%"), lang.HTML_TEXT_DISPLAY_SETTINGS);
+  html.replace(F("%DISPLAYTEXT%"), lang.HTML_TEXT_DISPLAY_SAVED);
   server.sendContent(html);
 
   if (INVERT_DISPLAY != flipOld)
@@ -2147,9 +2172,9 @@ void handleResetDefaults()
   server.send(200, F("text/html"), "");
 
   String html = FPSTR(Reset_Default_Page);
-  html.replace("%LANG%", OPEN_WEATHER_MAP_LANGUAGE);
-  html.replace("%DEFAULTSETTINGS%", HTML_TEXT[31]);
-  html.replace("%DEFAULTTEXT%", HTML_TEXT[32]);
+  html.replace(F("%LANG%"), currentLang);
+  html.replace(F("%DEFAULTSETTINGS%"), lang.HTML_TEXT_DEFAULT_SETTINGS);
+  html.replace(F("%DEFAULTTEXT%"), lang.HTML_TEXT_DEFAULT_RESTORED);
   server.sendContent(html);
 
   server.client().stop();
@@ -2167,13 +2192,12 @@ void handleUpdateData()
 
 void onOTAStart()
 {
-  Serial.println(CleanText(LOG_TEXT[15]).c_str());
+  Serial.println(CleanText(lang.LOG_OTA_STARTED).c_str());
   display.clear();
   display.display();
   display.setTextAlignment(TEXT_ALIGN_CENTER);
-  display.setFont(ArialMT_Plain_10);
-  display.drawString(64, 10, CleanText(OTA_TEXT[0]));
-  display.drawString(64, 30, CleanText(OTA_TEXT[1]));
+  display.setFont(ArialMT_Plain_16);
+  display.drawStringMaxWidth(64, 10, 128, CleanText(lang.OTA_START_TEXT));
   display.display();
   delay(250);
 }
@@ -2184,13 +2208,12 @@ void onOTAProgress(size_t current, size_t final)
   if (millis() - ota_progress_millis > 1000)
   {
     ota_progress_millis = millis();
-    Serial.printf_P(PSTR("%s %s: %u bytes, %s: %u bytes\n"), CleanText(LOG_TEXT[16]).c_str(), CleanText(LOG_TEXT[17]).c_str(), current, CleanText(LOG_TEXT[18]).c_str(), final);
+    Serial.printf_P(PSTR("%s %s: %u bytes, %s: %u bytes\n"), CleanText(lang.LOG_OTA_PROGRESS).c_str(), CleanText(lang.LOG_NOW).c_str(), current, CleanText(lang.LOG_FINAL).c_str(), final);
     display.clear();
     display.display();
     display.setTextAlignment(TEXT_ALIGN_CENTER);
-    display.setFont(ArialMT_Plain_10);
-    display.drawString(64, 10, CleanText(OTA_TEXT[0]));
-    display.drawString(64, 30, CleanText(OTA_TEXT[3]));
+    display.setFont(ArialMT_Plain_16);
+    display.drawStringMaxWidth(64, 10, 128, CleanText(lang.OTA_PROGRESS_TEXT));
     display.display();
   }
 }
@@ -2199,32 +2222,30 @@ void onOTAEnd(bool success)
 {
   if (success)
   {
-    Serial.println(CleanText(LOG_TEXT[19]).c_str());
+    Serial.println(CleanText(lang.LOG_OTA_SUCCESS).c_str());
     display.clear();
     display.display();
     display.setTextAlignment(TEXT_ALIGN_CENTER);
-    display.setFont(ArialMT_Plain_10);
-    display.drawString(64, 10, CleanText(OTA_TEXT[0]));
-    display.drawString(64, 30, CleanText(OTA_TEXT[2]));
+    display.setFont(ArialMT_Plain_16);
+    display.drawStringMaxWidth(64, 10, 128, CleanText(lang.OTA_FINISH_TEXT));
     display.display();
     delay(250);
     display.displayOff();
   }
   else
   {
-    Serial.println(CleanText(LOG_TEXT[20]).c_str());
+    Serial.println(CleanText(lang.LOG_OTA_ERROR).c_str());
     display.clear();
     display.display();
     display.setTextAlignment(TEXT_ALIGN_CENTER);
-    display.setFont(ArialMT_Plain_10);
-    display.drawString(64, 10, CleanText(OTA_TEXT[0]));
-    display.drawString(64, 30, CleanText(OTA_TEXT[4]));
+    display.setFont(ArialMT_Plain_16);
+    display.drawStringMaxWidth(64, 10, 128, CleanText(lang.OTA_ERROR_TEXT));
     display.display();
     delay(250);
   }
 }
 
-int get12Hour(int hour)
+uint8_t get12Hour(uint8_t hour)
 {
   if (hour == 0 || hour == 12)
   {
@@ -2232,7 +2253,7 @@ int get12Hour(int hour)
   }
   else if (hour > 12)
   {
-    int tH = hour - 12;
+    uint8_t tH = hour - 12;
     return tH;
   }
   else
@@ -2241,7 +2262,7 @@ int get12Hour(int hour)
   }
 }
 
-String getAMPM(int hour)
+String getAMPM(uint8_t hour)
 {
   if (hour == 0)
   {

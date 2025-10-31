@@ -1,6 +1,7 @@
 /**The MIT License (MIT)
 
  Copyright (c) 2018 by ThingPulse Ltd., https://thingpulse.com
+Edited by idezentas
 
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -180,12 +181,6 @@ void OpenWeatherMapCurrent::value(String value)
     this->data->temp = value.toFloat();
     Serial.printf_P(PSTR("temp: %.2f\n"), value.toFloat());
   }
-  // "feels_like": 290.87, float feelsLike;
-  if (currentKey == "feels_like")
-  {
-    this->data->feelsLike = value.toFloat();
-    Serial.printf_P(PSTR("feelsLike: %.2f\n"), value.toFloat());
-  }
   // "pressure": 1013, uint16_t pressure;
   if (currentKey == "pressure")
   {
@@ -197,18 +192,6 @@ void OpenWeatherMapCurrent::value(String value)
   {
     this->data->humidity = value.toInt();
     Serial.printf_P(PSTR("humidity: %ld\n"), value.toInt());
-  }
-  // "temp_min": 289.15, float tempMin;
-  if (currentKey == "temp_min")
-  {
-    this->data->tempMin = value.toFloat();
-    Serial.printf_P(PSTR("tempMin: %.2f\n"), value.toFloat());
-  }
-  // "temp_max": 292.15 float tempMax;
-  if (currentKey == "temp_max")
-  {
-    this->data->tempMax = value.toFloat();
-    Serial.printf_P(PSTR("tempMax: %.2f\n"), value.toFloat());
   }
   // "wind": {"speed": 1.5}, float windSpeed;
   if (currentKey == "speed")
@@ -245,6 +228,13 @@ void OpenWeatherMapCurrent::value(String value)
   {
     this->data->sunset = value.toInt();
     Serial.printf_P(PSTR("sunset: %ld\n"), value.toInt());
+  }
+
+  // "timezone": 7200, uint16_t timezone;
+  if (currentKey == "timezone")
+  {
+    this->data->timezone = value.toInt();
+    Serial.printf_P(PSTR("timezone: %ld\n"), value.toInt());
   }
 }
 

@@ -16,7 +16,7 @@ This project is based on the [ThingPulse - WeatherStationDemo](https://github.co
 - Mobile-Friendly Interface: Fully responsive design
 - Multi-language Support: Currently supports **Turkish** and **English**
 - Indoor: Temperature and humidity data were obtained using a DHT22 sensor.
-- OLED Screen Pages: Time and date, City and country name, Temperature, Humidity, Indoor temperature, Indoor humidity, Wind speed and direction, Air quality, UV index, Weather forecasts (2 pages), Sunrise/sunset, Moonrise/moonset and phase, Wi-Fi network name and signal strength, IP address, Next update
+- OLED Screen Pages: Time and date, City and country name, Temperature, Humidity, Indoor temperature, Indoor humidity, Wind speed and direction, Air quality, UV index, Atmospheric pressure, Daily Weather forecasts (2 pages), Sunrise/sunset, Moonrise/moonset and phase, Wi-Fi network name and signal strength, IP address, Next update
 
 ## Web Interface Screenshots
 
@@ -87,10 +87,7 @@ Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/e
   - [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor)
   - [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
 
-- Then open the `esp8266_WeatherStation.ino` file:
-  - If you want to use Turkish, change `#include "lang_tr.h"`, if you want to use English, change `#include "lang_en.h"`. This selection specifies the language of the text on the OLED and web page.
-
-- Upload the software to the NodeMCU (ESP8266) device.
+- Then upload the code to the NodeMCU (ESP8266) device.
 
 - If your WiFi network is already configured, it will connect automatically. You do not need to configure the WiFiManager settings.
 
@@ -112,6 +109,7 @@ Wiring Diagram Source: [Random Nerd Tutorials](https://randomnerdtutorials.com/e
   - Click the **Save** button. After clicking, you will be automatically redirected to the home page.
 
 - Then, go to the **Device Settings** page via the web interface:
+  - Select the language you want to use. (Default language is `English`)
   - Enter the city, country names then click the **Find Location/Time from City** button. It will automatically configure the other necessary settings for you.
   - If you know the latitude and longitude values, you can replace them with your own values. (You can find the latitude and longitude values on Google Maps.)
   - To check the latitude and longitude values entered, click the **Show on Map** button. (The location corresponding to the values entered will be displayed on Google Maps in the new tab.)
@@ -159,7 +157,7 @@ Bu proje, [ThingPulse - WeatherStationDemo](https://github.com/ThingPulse/esp826
 - Mobil Uyumlu Arayüz: Tüm cihazlarda uyumlu tasarım
 - Çoklu Dil Desteği: Şu anda **Türkçe** ve **İngilizce** arayüz seçeneği
 - İç Mekan: DHT22 sensörü ile sıcaklık ve nem bilgileri elde edildi.
-- OLED Ekrandaki Sayfalar: Saat ve tarih, Şehir ve ülke adı, Hava sıcaklığı, Nem, İç mekan sıcaklığı, İç mekan nemi, Rüzgar hızı ve yönü, Hava kalitesi, UV indeksi, Hava tahminleri (2 Sayfa), Güneşin doğuşu/batışı, Ayın doğuşu/batışı ve evresi, Wifi ağ adı ve sinyal kalitesi, IP adresi, Sonraki güncelleme
+- OLED Ekrandaki Sayfalar: Saat ve tarih, Şehir ve ülke adı, Hava sıcaklığı, Nem, İç mekan sıcaklığı, İç mekan nemi, Rüzgar hızı ve yönü, Hava kalitesi, UV indeksi, Atmosferik basınç, Günlük Hava tahminleri (2 Sayfa), Güneşin doğuşu/batışı, Ayın doğuşu/batışı ve evresi, Wifi ağ adı ve sinyal kalitesi, IP adresi, Sonraki güncelleme
 
 ## Web Arayüzü Ekran görüntüleri
 
@@ -230,10 +228,7 @@ Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutoria
   - [Adafruit Unified Sensor](https://github.com/adafruit/Adafruit_Sensor)
   - [DHT sensor library](https://github.com/adafruit/DHT-sensor-library)
 
-- Daha sonra `esp8266_WeatherStation.ino` dosyasını açarak:
-  - Eğer kullanmak istediğiniz dil Türkçe ise `#include "lang_tr.h"`, Eğer kullanmak istediğiniz dil İngilizce ise `#include "lang_en.h"` olarak değiştiriniz. Bu seçiminiz OLED ve web sayfası üzerinde bulunan yazılarının dili belirtmektedir.
-
-- Yazılımı NodeMCU(ESP8266) cihaza yükleyin.
+- Daha sonra kodu NodeMCU(ESP8266) cihaza yükleyin.
 
 - Eğer WiFi ağınız daha önceden tanımlı ise kendisi otomatik olarak bağlanacaktır. WiFiManager ayarını yapmanıza gerek yoktur.
 
@@ -255,6 +250,7 @@ Bağlantı Şeması Kaynağı: [Random Nerd Tutorials](https://randomnerdtutoria
   - **Kaydet** butona basınız. Bastıktan sonra sizi otomatik olarak ana sayfaya yönlendirecektir.
 
 - Daha sonra web arayüzü üzerinden önce **Cihaz Ayarları** sayfasına giderek:
+  - Kullanmak istediğiniz dili seçiniz. (Varsayılan dil `İngilizce`'dir)
   - Şehir ve Ülke adlarını girip **Şehirden Konum/Zaman Bul** butonuna tıklayınız. Size otomatik olarak diğer gerekli ayarları yapacaktır.
   - Eğer enlem ve boylam değerleri biliyorsanız enlem ve boylam değerlerini kendi değerleriniz ile değiştirebilirsiniz. (Enlem ve boylam değerlerini Google Haritalar üzerinden öğrenebilirsiniz.)
   - Girilen enlem ve boylam değerlerini kontrol etmek için **Haritada Göster** butonuna tıklayınız. (Girilen değerlere karşılık gelen konum, yeni sekmedeki Google Haritalar'da görüntülenecektir.)

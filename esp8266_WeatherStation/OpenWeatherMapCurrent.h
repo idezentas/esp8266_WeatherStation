@@ -1,6 +1,7 @@
 /**The MIT License (MIT)
  
  Copyright (c) 2018 by ThingPulse Ltd., https://thingpulse.com
+ Edited by idezentas
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -28,7 +29,7 @@
 typedef struct OpenWeatherMapCurrentData {
   // "lon": 8.54,
   float lon;
-  // "lat": 47.37
+  // "lat": 47.37,
   float lat;
   // "id": 521,
   uint16_t weatherId;
@@ -42,16 +43,10 @@ typedef struct OpenWeatherMapCurrentData {
   String iconMeteoCon;
   // "temp": 290.56,
   float temp;
-  // feels_like	290.87
-  float feelsLike;
   // "pressure": 1013,
   uint16_t pressure;
   // "humidity": 87,
   uint8_t humidity;
-  // "temp_min": 289.15,
-  float tempMin;
-  // "temp_max": 292.15
-  float tempMax;
   // "wind": {"speed": 1.5},
   float windSpeed;
   // "wind": {deg: 226.505},
@@ -64,6 +59,8 @@ typedef struct OpenWeatherMapCurrentData {
   uint32_t sunrise;
   // "sunset": 1527015901
   uint32_t sunset;
+  // "timezone": 7200,
+  uint16_t timezone;
 } OpenWeatherMapCurrentData;
 
 class OpenWeatherMapCurrent: public JsonListener {

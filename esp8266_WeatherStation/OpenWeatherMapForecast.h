@@ -1,6 +1,7 @@
 /**The MIT License (MIT)
  
  Copyright (c) 2018 by ThingPulse Ltd., https://thingpulse.com
+ Edited by idezentas 
  
  Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -32,12 +33,6 @@ typedef struct OpenWeatherMapForecastData {
   // "main":{
   //   "temp":17.35,
   float temp;
-  //   "feels_like": 16.99,
-  float feelsLike;
-  //   "temp_min":16.89,
-  float tempMin;
-  //   "temp_max":17.35,
-  float tempMax;
   //   "pressure":970.8,
   float pressure;
   //   "humidity":97,
