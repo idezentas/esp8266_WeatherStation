@@ -129,40 +129,14 @@ void OpenWeatherMapCurrent::key(String key)
 
 void OpenWeatherMapCurrent::value(String value)
 {
-  // "lon": 8.54, float lon;
-  if (currentKey == "lon")
-  {
-    this->data->lon = value.toFloat();
-    Serial.printf_P(PSTR("lon: %.2f\n"), value.toFloat());
-  }
-  // "lat": 47.37 float lat;
-  if (currentKey == "lat")
-  {
-    this->data->lat = value.toFloat();
-    Serial.printf_P(PSTR("lat: %.2f\n"), value.toFloat());
-  }
   // weatherItemCounter: only get the first item if more than one is available
   if (currentParent == "weather" && weatherItemCounter == 0)
   {
-    // "id": 521, weatherId weatherId;
-    if (currentKey == "id")
-    {
-      this->data->weatherId = value.toInt();
-      Serial.printf_P(PSTR("weatherId: %ld\n"), value.toInt());
-    }
-    // "main": "Rain", String main;
-    if (currentKey == "main")
-    {
-      this->data->main = value;
-      Serial.printf_P(PSTR("main: %s\n"), value.c_str());
-    }
     // "description": "shower rain", String description;
     if (currentKey == "description")
     {
       this->data->description = value;
-      this->data->descriptionClean = UpperText(CleanText(value).c_str());
       Serial.printf_P(PSTR("description: %s\n"), value.c_str());
-      Serial.printf_P(PSTR("descriptionClean: %s\n"), UpperText(CleanText(value)).c_str());
     }
     // "icon": "09d" String icon;
     // String iconMeteoCon;
@@ -205,12 +179,6 @@ void OpenWeatherMapCurrent::value(String value)
     this->data->windDeg = value.toFloat();
     Serial.printf_P(PSTR("windDeg: %.2f\n"), value.toFloat());
   }
-  // "clouds": {"all": 90}, uint8_t clouds;
-  if (currentKey == "all")
-  {
-    this->data->clouds = value.toInt();
-    Serial.printf_P(PSTR("clouds: %ld\n"), value.toInt());
-  }
   // "dt": 1527015000, uint64_t observationTime;
   if (currentKey == "dt")
   {
@@ -228,13 +196,6 @@ void OpenWeatherMapCurrent::value(String value)
   {
     this->data->sunset = value.toInt();
     Serial.printf_P(PSTR("sunset: %ld\n"), value.toInt());
-  }
-
-  // "timezone": 7200, uint16_t timezone;
-  if (currentKey == "timezone")
-  {
-    this->data->timezone = value.toInt();
-    Serial.printf_P(PSTR("timezone: %ld\n"), value.toInt());
   }
 }
 
@@ -258,33 +219,13 @@ void OpenWeatherMapCurrent::endObject()
 
 void OpenWeatherMapCurrent::endDocument()
 {
+  Serial.println();
+  Serial.println(F("end document"));
+  Serial.println();
 }
 
 void OpenWeatherMapCurrent::startArray()
 {
-}
-
-String OpenWeatherMapCurrent::UpperText(String text)
-{
-  text.toUpperCase();
-  return text;
-}
-
-String OpenWeatherMapCurrent::CleanText(String text)
-{
-  text.replace("Ç", "C");
-  text.replace("ç", "c");
-  text.replace("Ş", "S");
-  text.replace("ş", "s");
-  text.replace("Ö", "O");
-  text.replace("ö", "o");
-  text.replace("İ", "I");
-  text.replace("ı", "i");
-  text.replace("Ü", "U");
-  text.replace("ü", "u");
-  text.replace("ğ", "g");
-  text.replace("Ğ", "G");
-  return text;
 }
 
 String OpenWeatherMapCurrent::getMeteoconIcon(String icon)

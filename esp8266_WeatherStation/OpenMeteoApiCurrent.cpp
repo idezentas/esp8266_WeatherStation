@@ -146,6 +146,9 @@ void OpenMeteoApiCurrent::endObject()
 
 void OpenMeteoApiCurrent::endDocument()
 {
+  Serial.println();
+  Serial.println(F("end document"));
+  Serial.println();
 }
 
 void OpenMeteoApiCurrent::startArray()

@@ -28,22 +28,23 @@
 #include <WiFi.h>
 #endif
 #include <WiFiClient.h>
-#include "OpenWeatherMapAir.h"
+#include "TimeZoneDB.h"
 
-OpenWeatherMapAir::OpenWeatherMapAir()
+TimeZoneDB::TimeZoneDB()
 {
 }
-void OpenWeatherMapAir::updateCurrent(OpenWeatherMapAirData *data, String appId, float lat, float lon)
+
+void TimeZoneDB::updateCurrent(TimeZoneDBData *data, String appId, float lat, float lon)
 {
-  doUpdate(data, buildPath(appId, "lat=" + String(lat, 7) + "&lon=" + String(lon, 7)));
+  doUpdate(data, buildPath(appId, "lat=" + String(lat, 7) + "&lng=" + String(lon, 7)));
 }
 
-String OpenWeatherMapAir::buildPath(String appId, String locationParameter)
+String TimeZoneDB::buildPath(String appId, String locationParameter)
 {
-  return "/data/2.5/air_pollution?" + locationParameter + "&appid=" + appId;
+  return "/v2.1/get-time-zone?key=" + appId + "&format=json&by=position&" + locationParameter;
 }
 
-void OpenWeatherMapAir::doUpdate(OpenWeatherMapAirData *data, String path)
+void TimeZoneDB::doUpdate(TimeZoneDBData *data, String path)
 {
   unsigned long lostTest = 10000UL;
   unsigned long lost_do = millis();
@@ -100,48 +101,60 @@ void OpenWeatherMapAir::doUpdate(OpenWeatherMapAirData *data, String path)
   this->data = nullptr;
 }
 
-void OpenWeatherMapAir::whitespace(char c)
+void TimeZoneDB::whitespace(char c)
 {
   Serial.println(F("whitespace"));
 }
 
-void OpenWeatherMapAir::startDocument()
+void TimeZoneDB::startDocument()
 {
   Serial.println(F("start document"));
   Serial.println();
 }
 
-void OpenWeatherMapAir::key(String key)
+void TimeZoneDB::key(String key)
 {
   currentKey = String(key);
 }
 
-void OpenWeatherMapAir::value(String value)
+void TimeZoneDB::value(String value)
 {
-  // "aqi": 2, uint8_t aqi;
-  if (currentParent == "main" && currentKey == "aqi")
+  // "zoneName": "America/Los_Angeles", String zoneName;
+  if (currentKey == "zoneName")
   {
-    this->data->aqi = value.toInt();
-    Serial.printf_P(PSTR("aqi: %ld\n"), value.toInt());
+    this->data->zoneName = value.c_str();
+    Serial.printf_P(PSTR("zoneName: %s\n"), value.c_str());
   }
-  // "dt": 1751288421, uint32_t observationTime;
-  if (currentKey == "dt")
+  // "abbreviation": "PST", String abbreviation;
+  if (currentKey == "abbreviation")
   {
-    this->data->observationTime = value.toInt();
-    Serial.printf_P(PSTR("observationTime: %ld\n"), value.toInt());
+    this->data->abbreviation = value.c_str();
+    Serial.printf_P(PSTR("abbreviation: %s\n"), value.c_str());
+  }
+  // "gmtOffset": -28800, int16_t gmtOffset;
+  if (currentKey == "gmtOffset")
+  {
+    this->data->gmtOffset = value.toInt();
+    Serial.printf_P(PSTR("gmtOffset: %ld\n"), value.toInt());
+  }
+  // "dst": "0", uint8_t dst;
+  if (currentKey == "dst")
+  {
+    this->data->dst = value.toInt();
+    Serial.printf_P(PSTR("dst: %ld\n"), value.toInt());
   }
 }
 
-void OpenWeatherMapAir::endArray()
+void TimeZoneDB::endArray()
 {
 }
 
-void OpenWeatherMapAir::startObject()
+void TimeZoneDB::startObject()
 {
   currentParent = currentKey;
 }
 
-void OpenWeatherMapAir::endObject()
+void TimeZoneDB::endObject()
 {
   if (currentParent == "weather")
   {
@@ -150,12 +163,13 @@ void OpenWeatherMapAir::endObject()
   currentParent = "";
 }
 
-void OpenWeatherMapAir::endDocument()
+void TimeZoneDB::endDocument()
 {
+  Serial.println();
   Serial.println(F("end document"));
   Serial.println();
 }
 
-void OpenWeatherMapAir::startArray()
+void TimeZoneDB::startArray()
 {
 }

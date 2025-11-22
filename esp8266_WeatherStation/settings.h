@@ -1,10 +1,10 @@
 #include <Arduino.h>
-#include "lang_tr.h"
-#include "lang_en.h"
+#include "Translations.h"
 
-#define VERSION "1.5"
+#define VERSION "1.6"
 
-String currentLang = "en"; // tr or en
+String currentLang = "en"; // en, tr, it, es
+lang_t language_id = LANG_EN;
 
 String SysUser = "admin";
 String SysPass = "esp8266";
@@ -14,18 +14,18 @@ const String configName = "/config.txt";
 const String securityConfig = "/security.txt";
 const String displayConfig = "/display.txt";
 const String ApiKeyConfig = "/apikey.txt";
+const String worldClockConfig = "/worldClock.txt";
 
 #define HOSTNAME "WeatherStat-AP"
 
-// change for different NTP (time servers)
 #define NTP_SERVERS "pool.ntp.org"
 
 // Setup
-int UPDATE_INTERVAL = 15; // Update every 15 minutes
+int UPDATE_INTERVAL = 10; // Update every 10 minutes
 int UPDATE_INTERVAL_SECS = UPDATE_INTERVAL * 60;
-
 String timeDisplayTurnsOn = "08:00";  // 24 Hour Format HH:MM -- Leave blank for always on. (ie 05:30)
 String timeDisplayTurnsOff = "00:00"; // 24 Hour Format HH:MM -- Leave blank for always on. Both must be set to work.
+bool themeIsDark = true;              // true = dark theme | false = light theme
 
 // Display Settings
 const int I2C_DISPLAY_ADDRESS = 0x3c;
@@ -42,8 +42,26 @@ float OPEN_WEATHER_MAP_LOCATION_LAT = 41.0063820;
 float OPEN_WEATHER_MAP_LOCATION_LON = 28.9758720;
 String Display_City_Name = "İstanbul";
 String Display_Country_Name = "Türkiye";
-String Display_TZ_NAME = "Europe/Istanbul";
 bool IS_METRIC = true;
 
 // OpenCage Settings
 String OPEN_CAGE_ID = ""; // Sign up here to get an API key: https://opencagedata.com
+
+// TimeZoneDB Settings
+String TimeZoneDB_KEY = ""; // Sign up here to get an API key: https://timezonedb.com
+
+// World Clock Settings
+String World_Clock1_City_Name = "London";
+String World_Clock1_Country_Name = "United Kingdom";
+float World_Clock1_LAT = 51.5074456;
+float World_Clock1_LON = -0.1277653;
+
+String World_Clock2_City_Name = "Milan";
+String World_Clock2_Country_Name = "Italy";
+float World_Clock2_LAT = 45.4641943;
+float World_Clock2_LON = 9.1896346;
+
+String World_Clock3_City_Name = "Los Angeles";
+String World_Clock3_Country_Name = "United States of America";
+float World_Clock3_LAT = 34.0536909;
+float World_Clock3_LON = -118.242766;

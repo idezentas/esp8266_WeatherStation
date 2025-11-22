@@ -174,8 +174,6 @@ void OpenWeatherMapForecast::value(String value)
   {
     data[currentForecast].temp = value.toFloat();
     Serial.printf_P(PSTR("temp: %.2f\n"), value.toFloat());
-    // initialize potentially empty values:
-    data[currentForecast].rain = 0;
   }
   //   "pressure":970.8,float pressure;
   if (currentKey == "pressure")
@@ -183,7 +181,7 @@ void OpenWeatherMapForecast::value(String value)
     data[currentForecast].pressure = value.toFloat();
     Serial.printf_P(PSTR("pressure: %.2f\n"), value.toFloat());
   }
-  //   "":97,uint8_t humidity;
+  //   "humidity":97,uint8_t humidity;
   if (currentKey == "humidity")
   {
     data[currentForecast].humidity = value.toInt();
@@ -192,25 +190,11 @@ void OpenWeatherMapForecast::value(String value)
   // },"weather":[{
   if (currentParent == "weather")
   {
-    //   "id":802,uint16_t weatherId;
-    if (currentKey == "id")
-    {
-      data[currentForecast].weatherId = value.toInt();
-      Serial.printf_P(PSTR("weatherId: %ld\n"), value.toInt());
-    }
-    //   "main":"Clouds",String main;
-    if (currentKey == "main")
-    {
-      data[currentForecast].main = value;
-      Serial.printf_P(PSTR("main: %s\n"), value.c_str());
-    }
     //   "description":"scattered clouds",String description;
     if (currentKey == "description")
     {
       data[currentForecast].description = value;
-      data[currentForecast].descriptionClean = UpperText(CleanText(value).c_str());
       Serial.printf_P(PSTR("description: %s\n"), value.c_str());
-      Serial.printf_P(PSTR("descriptionClean: %s\n"), UpperText(CleanText(value)).c_str());
     }
     //   "icon":"03d" String icon; String iconMeteoCon;
     if (currentKey == "icon")
@@ -220,12 +204,6 @@ void OpenWeatherMapForecast::value(String value)
       Serial.printf_P(PSTR("icon: %s\n"), value.c_str());
       Serial.printf_P(PSTR("iconMeteoCon: %s\n"), getMeteoconIcon(value).c_str());
     }
-  }
-  // }],"clouds":{"all":44},uint8_t clouds;
-  if (currentKey == "all")
-  {
-    data[currentForecast].clouds = value.toInt();
-    Serial.printf_P(PSTR("clouds: %ld\n"), value.toInt());
   }
   // "wind":{
   //   "speed":1.77, float windSpeed;
@@ -239,18 +217,6 @@ void OpenWeatherMapForecast::value(String value)
   {
     data[currentForecast].windDeg = value.toFloat();
     Serial.printf_P(PSTR("windDeg: %.2f\n"), value.toFloat());
-  }
-  // rain: {3h: 0.055}, float rain;
-  if (currentKey == "3h")
-  {
-    data[currentForecast].rain = value.toFloat();
-    Serial.printf_P(PSTR("rain: %.2f\n"), value.toFloat());
-  }
-  // },"sys":{"pod":"d"}, String pod;
-  if (currentKey == "pod")
-  {
-    data[currentForecast].pod = value;
-    Serial.printf_P(PSTR("pod: %s\n"), value.c_str());
   }
   // dt_txt: "2018-05-23 09:00:00"   String observationTimeText;
   if (currentKey == "dt_txt")
@@ -282,33 +248,12 @@ void OpenWeatherMapForecast::endObject()
 
 void OpenWeatherMapForecast::endDocument()
 {
+  Serial.println(F("end document"));
+  Serial.println();
 }
 
 void OpenWeatherMapForecast::startArray()
 {
-}
-
-String OpenWeatherMapForecast::UpperText(String text)
-{
-  text.toUpperCase();
-  return text;
-}
-
-String OpenWeatherMapForecast::CleanText(String text)
-{
-  text.replace("Ç", "C");
-  text.replace("ç", "c");
-  text.replace("Ş", "S");
-  text.replace("ş", "s");
-  text.replace("Ö", "O");
-  text.replace("ö", "o");
-  text.replace("İ", "I");
-  text.replace("ı", "i");
-  text.replace("Ü", "U");
-  text.replace("ü", "u");
-  text.replace("ğ", "g");
-  text.replace("Ğ", "G");
-  return text;
 }
 
 String OpenWeatherMapForecast::getMeteoconIcon(String icon)

@@ -27,17 +27,8 @@
 #include <JsonStreamingParser.h>
 
 typedef struct OpenWeatherMapCurrentData {
-  // "lon": 8.54,
-  float lon;
-  // "lat": 47.37,
-  float lat;
-  // "id": 521,
-  uint16_t weatherId;
-  // "main": "Rain",
-  String main;
   // "description": "shower rain",
   String description;
-  String descriptionClean;
   // "icon": "09d"
   String icon;
   String iconMeteoCon;
@@ -51,16 +42,12 @@ typedef struct OpenWeatherMapCurrentData {
   float windSpeed;
   // "wind": {deg: 226.505},
   float windDeg;
-  // "clouds": {"all": 90},
-  uint8_t clouds;
   // "dt": 1527015000,
   uint32_t observationTime;
   // "sunrise": 1526960448,
   uint32_t sunrise;
   // "sunset": 1527015901
   uint32_t sunset;
-  // "timezone": 7200,
-  uint16_t timezone;
 } OpenWeatherMapCurrentData;
 
 class OpenWeatherMapCurrent: public JsonListener {
@@ -91,8 +78,6 @@ class OpenWeatherMapCurrent: public JsonListener {
     String getLanguage() { return language; }
     
     String getMeteoconIcon(String icon);
-    String CleanText(String text);
-	  String UpperText(String text);
     virtual void whitespace(char c);
 
     virtual void startDocument();

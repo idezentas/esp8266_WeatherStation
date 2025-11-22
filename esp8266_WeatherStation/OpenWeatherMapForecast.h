@@ -38,27 +38,16 @@ typedef struct OpenWeatherMapForecastData {
   //   "humidity":97,
   uint8_t humidity;
   // },"weather":[{
-  //   "id":802,
-  uint16_t weatherId;
-  //   "main":"Clouds",
-  String main;
   //   "description":"scattered clouds",
   String description;
-  String descriptionClean;
   //   "icon":"03d"
   String icon;
   String iconMeteoCon;
-  // }],"clouds":{"all":44},
-  uint8_t clouds;
   // "wind":{
   //   "speed":1.77,
   float windSpeed;
   //   "deg":207.501
   float windDeg;
-  // rain: {3h: 0.055},
-  float rain;
-  // },"sys":{"pod":"d"}
-  String pod;
   // dt_txt: "2018-05-23 09:00:00"
   String observationTimeText;
 
@@ -75,7 +64,7 @@ class OpenWeatherMapForecast: public JsonListener {
     uint8_t maxForecasts;
     uint8_t currentForecast;
     boolean metric = true;
-    String language = "en";
+    String language;
     const uint8_t *allowedHours;
     uint8_t allowedHoursCount = 0;
     boolean isCurrentForecastAllowed = true;
@@ -101,9 +90,7 @@ class OpenWeatherMapForecast: public JsonListener {
     }
 
 
-    String getMeteoconIcon(String icon);
-    String CleanText(String text);
-	  String UpperText(String text);      
+    String getMeteoconIcon(String icon);   
     virtual void whitespace(char c);
 
     virtual void startDocument();
